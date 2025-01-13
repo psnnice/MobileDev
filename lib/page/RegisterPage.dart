@@ -1,64 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'Home.dart';
-import 'RegisterPage.dart';
+import 'package:up_transit/page/LoginPage.dart';
 
-void  main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const LoginPage(),
-    );
-  }
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
-
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
 
-  void _login() {
+  void _register() {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      // Mock login process
+      // Mock registration process
       Future.delayed(const Duration(seconds: 1), () {
         setState(() {
           _isLoading = false;
         });
 
-        if (_usernameController.text == 'admin' &&
-            _passwordController.text == '1234') {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => Home()),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Login Successful'),
-              backgroundColor: Colors.green,
-            ),
+        if (_passwordController.text == _confirmPasswordController.text) {
+          // Registration successful
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Registration Successful'),
+                content: const Text('Your account has been successfully created.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // ปิด Dialog
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                      ); // กลับไปหน้า Login
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
+              );
+            },
           );
         } else {
+          // Registration failed
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Invalid username or password'),
+              content: Text('Passwords do not match'),
               backgroundColor: Colors.red,
             ),
           );
@@ -93,11 +93,10 @@ class _LoginPageState extends State<LoginPage> {
                       fontSize: 52,
                     ),
                   ),
-                  const SizedBox(height: 10),
 
                   // pageName
                   Text(
-                    'Login',
+                    'Register',
                     style: GoogleFonts.bebasNeue(
                       fontSize: 42,
                     ),
@@ -163,11 +162,43 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Login button
+                  // Confirm Password TextField
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.white),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0),
+                        child: TextFormField(
+                          controller: _confirmPasswordController,
+                          obscureText: true,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Confirm Password',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please confirm your password';
+                            } else if (value != _passwordController.text) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Register button
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: GestureDetector(
-                      onTap: _isLoading ? null : _login,
+                      onTap: _isLoading ? null : _register,
                       child: Container(
                         padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
@@ -180,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
                             color: Colors.white,
                           )
                               : const Text(
-                            'Sign in',
+                            'Sign up',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -198,7 +229,7 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        'Not a Member?',
+                        'Have a member ',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -208,12 +239,12 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const RegisterPage(),
+                              builder: (context) => const LoginPage(),
                             ),
                           );
                         },
                         child: const Text(
-                          ' Register now',
+                          ' Login now',
                           style: TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,
