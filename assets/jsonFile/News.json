@@ -1,0 +1,36 @@
+[
+  {
+    "imagePath" : "assets/images/News/1.jpg",
+    "title" : "QS World University Rankings: Sustainability 2025",
+    "content" : "มหาวิทยาลัยพะเยาได้รับการจัดอันดับ 561 - 580 ของเอเชีย และอันดับ 16 ร่วมของประเทศไทย จาก Quacquarelli Symonds หรือ QS ซึ่งเป็นสถาบันวิเคราะห์และการจัดอันดับมหาวิทยาลัยที่มีชื่อเสียงระดับโลกจากประเทศอังกฤษ เผยแพร่ผลการจัดอันดับมหาวิทยาลัยโลก ด้านความยั่งยืน",
+    "url" : "https://www.up.ac.th/NewsRead.aspx?itemID=33461"
+  },
+
+  {
+    "imagePath": "assets/images/News/2.jpg",
+    "title": "UI Green Metric World University Ranking 2024",
+    "content": "มหาวิทยาลัยพะเยา ได้อันดับที่ 9 ของไทย จาก 59 มหาวิทยาลัยในประเทศไทย และเป็นอันดับที่ 106 ของโลก จากมหาวิทยาลัย 1,477 แห่ง ทั่วโลก โดยได้คะแนน 8,450 คะแนน เพิ่มขึ้น 250 คะแนน จากปีที่ผ่านมาที่ 8,200 คะแนน การจัดอันดับมหาวิทยาลัยสีเขียวโลก UI Green Metric World University Ranking",
+    "url":"https://www.up.ac.th/NewsRead.aspx?itemID=33460"
+  },
+
+  {
+    "imagePath": "assets/images/News/3.jpg",
+    "title": "Times Higher Education The World University Rankings 2025",
+    "content": "ระกาศผลการจัดอันดับมหาวิทยาลัย World University Rankings 2025 เมื่อวันที่ 9 ตุลาคม 2567 ที่ผ่านมา โดยมีสถาบันการศึกษาเข้าร่วมการจัดอันดับจำนวน 1,907 แห่ง จาก 108 ประเทศ โดย มหาวิทยาลัยพะเยา ถูกจัดเป็นอันดับ 1501+ ของโลก และอันดับที่ 13 ของประเทศไทย",
+    "url":"https://www.up.ac.th/NewsRead.aspx?itemID=33036"
+  },
+
+  {
+    "imagePath": "assets/images/News/4.jpg",
+    "title": "Times Higher Education Impact Rankings 2024",
+    "content": "Times Higher Education (THE) องค์กรจัดอันดับมหาวิทยาลัยโลก จากประเทศอังกฤษ ได้เผยแพร่ผลการจัดอันดับมหาวิทยาลัยที่มีการดำเนินงานเพื่อสนับสนุนเป้าหมายการพัฒนาที่ยั่งยืน (Sustainable Development Goals: SDGs) หรือ “THE Impact Rankings” ประจำปี 2567 มหาวิทยาลัยพะเยาได้รับการจัดอันดับอยู่ในอันดับที่ 401+ จากทั้งหมด 1,963 สถาบันทั่วโลก และอยู่ในอันดับที่ 11 ร่วมของประเทศไทย",
+    "url":"https://www.up.ac.th/NewsRead.aspx?itemID=32188"
+  },
+
+  {
+    "imagePath": "assets/images/News/5.jpg",
+    "title": "SCImago Institution Rankings 2023",
+    "content": "มหาวิทยาลัยพะเยา ได้อันดับที่ 10 ของประเทศไทย และได้ลำดับที่ 5,361 ของโลก ในปี 2023 ในการจัดอันดับแบบภาพรวม Overall Rank จากการจัดอันดับโลกโดย SCImago Institution Rankings 2023 ซึ่งมีการจัดอันดับการพิจารณาจากผลงาน 3 ด้าน ดังนี้ 1. ด้านงานวิจัย (Research) อยู่ในลำดับที่ 9 ของไทย อันดับที่ 4,919 ของโลก 2. ด้านนวัตกรรม (Innovation) อยู่ในลำดับที่ 15 ของไทย อันดับที่ 5,045 ของโลก 3. ด้านสังคม (Societal) อยู่ในลำดับที่ 18 ของไทย อันดับที่ 4,233 ของโลก",
+    "url":"https://www.up.ac.th/NewsRead.aspx?itemID=28754"
+  }
+]

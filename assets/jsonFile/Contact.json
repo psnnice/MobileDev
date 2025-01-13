@@ -1,0 +1,47 @@
+[
+  {
+    "imagePath" : "assets/images/Contact/imagePath/1.jpg",
+    "profileImage":"assets/images/Contact/profileImage/1.jpg",
+    "title" : "มหาวิทยาลัยพะเยา",
+    "email" : "prupnetwork@gmail.com",
+    "phoneNumber" : "054 466 666",
+    "url" : "https://www.facebook.com/profile.php?id=100070055702091&locale=th_TH"
+  },
+
+  {
+    "imagePath" : "assets/images/Contact/imagePath/2.jpg",
+    "profileImage":"assets/images/Contact/profileImage/2.jpg",
+    "title" : "มพ.โพสต์",
+    "email" : "prup.phayao@up.ac.th",
+    "phoneNumber" : "054 466 666",
+    "url" : "https://www.facebook.com/UP.PostV2?locale=th_TH"
+  },
+
+  {
+    "imagePath" : "assets/images/Contact/imagePath/3.jpg",
+    "profileImage":"assets/images/Contact/profileImage/3.jpg",
+    "title" : "งานทะเบียนนิสิต มหาวิทยาลัยพะเยา ",
+    "email" : " ",
+    "phoneNumber" : "054 466 666",
+    "url" : "https://www.facebook.com/reg.up.ac.th?locale=th_TH"
+  },
+
+  {
+    "imagePath" : "assets/images/Contact/imagePath/4.jpg",
+    "profileImage":"assets/images/Contact/profileImage/4.jpg",
+    "title" : "หมวดวิชาศึกษาทั่วไป มหาวิทยาลัยพะเยา ",
+    "email" : "ge.doesup@gmail.com",
+    "phoneNumber" : " ",
+    "url" : "https://www.facebook.com/GE.UP9?locale=th_TH"
+  },
+
+  {
+    "imagePath" : "assets/images/Contact/imagePath/5.jpg",
+    "profileImage":"assets/images/Contact/profileImage/5.jpg",
+    "title" : "กยศ.มหาวิทยาลัยพะเยา ",
+    "email" : "up_studentloan@hotmail.com",
+    "phoneNumber" : " ",
+    "url" : "https://www.facebook.com/profile.php?id=100064928854968&locale=th_TH"
+  }
+
+]
