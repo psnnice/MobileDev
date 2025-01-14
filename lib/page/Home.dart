@@ -44,38 +44,107 @@ class Home extends StatelessWidget {
       );
     }
 
-    return BasePage(
-      body: Center(
+return BasePage(
+  body: Container(
+    color: Color(0xFFDBE4EB), // เปลี่ยนสีพื้นหลังเป็น DBE4EB
+    child: Center(
+      child: SizedBox(
+        width: screenWidth,
+        height: screenHeight,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 20,), // Add some space at the top
-            Text(
-              'Welcome to UP Transit',
-              style: GoogleFonts.sourceCodePro(
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 28,
-                  color: Color.fromARGB(255, 0, 0, 0),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10), // Add some space between text and image
+            const SizedBox(height: 5),
             GestureDetector(
               onTap: () {
                 _showImageDialog(context);
               },
               child: Image(
                 image: const AssetImage('assets/upmap.jpg'),
-                width: screenWidth * 0.90, // Set width to 75% of screen width
+                width: screenWidth * 1, // Set width to 75% of screen width
                 fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Container(
+              padding: const EdgeInsets.all(7),
+              color: Color(0xFFC0D3E0),
+              child: ListTile(
+                leading: Icon(Icons.article,
+                size: 40,
+                color: Color(0xFF8D38C9),
+                ),
+                title: Text('News'),
+                subtitle: Text(
+                  'ข่าวสารประชาสัมพันธ์และกิจกรรม ภายในมหาวิทยาลัยพะเยา',
+                  style: TextStyle(color: Colors.black54),
+                ),
+                onTap: () {
+                  Navigator.pushNamed(context, '/News');
+                },
+              ),
+            ),
+            const SizedBox(height: 5),
+            Container(
+              padding: const EdgeInsets.all(7),
+              color: Color(0xFFC0D3E0),
+              child: ListTile(
+                leading: Icon(Icons.directions_bus,
+                size: 40,
+                color: Color(0xFF8D38C9),),
+                title: Text('Bus'),
+                subtitle: Text(
+                  'แสดงการเดินรถของรถเมล์ภายในมหาวิทยาลัยพะเยา เเบบเรียลไทม์',
+                  style: TextStyle(color: Colors.black54),
+                ),
+                onTap: () {
+                  Navigator.pushNamed(context, '/Bus');
+                },
+              ),
+            ),
+            const SizedBox(height: 5),
+            Container(
+              padding: const EdgeInsets.all(7),
+              color: Color(0xFFC0D3E0),
+              child: ListTile(
+                leading: Icon(Icons.map,
+                size: 40,
+                color: Color(0xFF8D38C9),),
+                title: Text('Route Map'),
+                subtitle: Text(
+                  'แสดงเส้นทางการเดินรถของรถเมล์ภายในมหาวิทยาลัยพะเยา',
+                  style: TextStyle(color: Colors.black54),
+                ),
+                onTap: () {
+                  Navigator.pushNamed(context, '/Map');
+                },
+              ),
+            ),
+            const SizedBox(height: 5),
+            Container(
+              padding: const EdgeInsets.all(7),
+              color: Color(0xFFC0D3E0),
+              child: ListTile(
+                leading: Icon(Icons.contact_mail,
+                size: 40,
+                color: Color(0xFF8D38C9),),
+                title: Text('Contact'),
+                subtitle: Text(
+                  'ช่องทางการติดต่อภายในมหาวิทยาลัยพะเยา เบื้องต้น',
+                  style: TextStyle(color: Colors.black54),
+                ),
+                onTap: () {
+                  Navigator.pushNamed(context, '/Contact');
+                },
               ),
             ),
           ],
         ),
       ),
-      index: 2,
-    );
+    ),
+  ),
+  index: 2, // เพิ่ม index ที่จำเป็น
+);
   }
 }

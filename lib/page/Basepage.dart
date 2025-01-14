@@ -42,7 +42,7 @@ class BasePageState extends State<BasePage> {
         child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.purple],
+              colors: [Color(0xFF8D38C9), Color(0xFF0092E7)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -53,7 +53,7 @@ class BasePageState extends State<BasePage> {
                 SizedBox(
                   height: 35, // Set height to match AppBar height
                   width: 35, // Set width to match AppBar height
-                  child: Image.asset('assets/bus.png'),
+                  child: Image.asset('assets/images/Logos/bus.png'),
                 ),
                 const SizedBox(width: 10), // Add some space
                 const Expanded(
@@ -75,6 +75,7 @@ class BasePageState extends State<BasePage> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.logout),
+                color: Colors.black,
                 onPressed: _logout,
                 tooltip: 'Logout',
               ),
@@ -86,7 +87,7 @@ class BasePageState extends State<BasePage> {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue, Colors.purple],
+            colors: [Color(0xFF8D38C9), Color(0xFF0092E7)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -114,8 +115,8 @@ class BasePageState extends State<BasePage> {
               label: 'Route',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.phone),
-              label: 'Calls',
+              icon: Icon(Icons.contact_mail),
+              label: 'Contact',
             ),
           ],
           onTap: _onItemTapped,

@@ -118,7 +118,7 @@ class _NewsPageState extends State<News> {
                 mainAxisSize: MainAxisSize.min,
                 children: const [
                   Text(
-                    'Readmore',
+                    'Read more',
                     style: TextStyle(fontSize: 16),
                   ),
                   Icon(Icons.double_arrow_rounded , color: Colors.black),
