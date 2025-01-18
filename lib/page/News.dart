@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
 import 'package:flutter/services.dart'; // ใช้สำหรับโหลดไฟล์ JSON
 import 'dart:convert';// ใช้สำหรับแปลง JSON
-import 'package:up_transit/page/Basepage.dart';
+import 'Basepage.dart';
 
 class News extends StatefulWidget {
   const News({super.key});

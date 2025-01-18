@@ -2,9 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:up_transit/page/LoginPage.dart';
+import 'LoginPage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+const ip = "192.168.1.202";
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -31,7 +33,7 @@ class _RegisterPageState extends State<RegisterPage> {
       try {
         
         final response = await http.post(
-          Uri.parse('http://127.0.0.1:8080/register'), 
+          Uri.parse('http://$ip:8080/register'), 
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
             'username': _usernameController.text,
@@ -97,7 +99,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 children: [
                   // โลโก้
                   Image.asset(
-                    'assets/images/Logos/Logo.png',
+                    '/assets/images/Logos/Logo.png',
                     scale: 2.75,
                   ),
                   const SizedBox(height: 5),

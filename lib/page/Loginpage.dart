@@ -7,6 +7,7 @@ import 'RegisterPage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+const ip = "192.168.1.202";
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -44,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
 
       try {
         final response = await http.post(
-          Uri.parse('http://127.0.0.1:8080/login'), // เปลี่ยนเป็น IP Emulator
+          Uri.parse('http://$ip:8080/login'), 
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
             'username': _usernameController.text,
