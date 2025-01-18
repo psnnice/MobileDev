@@ -1,4 +1,4 @@
-module github.com/psnnice/MobileDev
+module yo
 
 go 1.23.4
 
