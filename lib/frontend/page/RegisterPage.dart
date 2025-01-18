@@ -6,7 +6,7 @@ import 'LoginPage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const ip = "192.168.1.202";
+const ip = "192.168.1.202";//อย่าลืมเปลี่ยน ip 
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -99,7 +99,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 children: [
                   // โลโก้
                   Image.asset(
-                    '/assets/images/Logos/Logo.png',
+                    'assets/images/Logos/Logo.png',
                     scale: 2.75,
                   ),
                   const SizedBox(height: 5),

@@ -7,7 +7,8 @@ import 'RegisterPage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const ip = "192.168.1.202";
+const ip = "192.168.1.202";//อย่าลืมเปลี่ยน ip 
+
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
