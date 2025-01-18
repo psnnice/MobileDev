@@ -1,12 +1,15 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
 import 'package:flutter/services.dart'; // ใช้สำหรับโหลดไฟล์ JSON
 import 'dart:convert';// ใช้สำหรับแปลง JSON
 import 'package:up_transit/page/Basepage.dart';
 class Contact extends StatefulWidget {
-  const Contact({Key? key}) : super(key: key);
+  const Contact({super.key});
 
   @override
+  
   _ContacPageState createState() => _ContacPageState();
 }
 
@@ -161,12 +164,12 @@ class _ContacPageState extends State<Contact> {
               ],
             ),
             // ใช้ Positioned สำหรับไอคอนมุมล่างขวา
-            Positioned(
+            const Positioned(
               bottom: 8, // ระยะห่างจากขอบล่าง
               right: 8,  // ระยะห่างจากขอบขวา
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
+                children: [
                   Text(
                     'Read more',
                     style: TextStyle(fontSize: 16),

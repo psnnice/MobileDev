@@ -1,8 +1,12 @@
+// ignore_for_file: library_private_types_in_public_api, deprecated_member_use, duplicate_ignore
+
 import 'package:flutter/material.dart';
 
 import 'BasePage.dart';
 
 class Map extends StatefulWidget {
+  const Map({super.key});
+
   @override
   _MapState createState() => _MapState();
 }
@@ -37,7 +41,7 @@ class _MapState extends State<Map> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
+              SizedBox(
                 width: MediaQuery.of(context).size.width * 1,
                 height: MediaQuery.of(context).size.height * 0.75,
                 child: InteractiveViewer(
@@ -150,7 +154,7 @@ class _MapState extends State<Map> {
                         color: Colors.black.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: Offset(0, 3), // เปลี่ยนตำแหน่งของเงา
+                        offset: const Offset(0, 3), // เปลี่ยนตำแหน่งของเงา
                       ),
                     ],
                   ),
@@ -184,7 +188,7 @@ class _MapState extends State<Map> {
                         color: Colors.black.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: Offset(0, 3), // เปลี่ยนตำแหน่งของเงา
+                        offset: const Offset(0, 3), // เปลี่ยนตำแหน่งของเงา
                       ),
                     ],
                   ),
@@ -218,7 +222,7 @@ class _MapState extends State<Map> {
                         color: Colors.black.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: Offset(0, 3), // เปลี่ยนตำแหน่งของเงา
+                        offset: const Offset(0, 3), // เปลี่ยนตำแหน่งของเงา
                       ),
                     ],
                   ),

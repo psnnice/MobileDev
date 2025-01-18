@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'BasePage.dart';
 
 class Bus extends StatelessWidget {
+  const Bus({super.key});
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;

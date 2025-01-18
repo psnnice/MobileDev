@@ -1,24 +1,28 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'Home.dart';
 import 'RegisterPage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-void  main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoginPage(),
+      home: LoginPage(),
     );
   }
 }
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -31,20 +35,28 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _isLoading = false;
 
-  void _login() {
+  // func Register
+  Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      // Mock login process
-      Future.delayed(const Duration(seconds: 1), () {
+      try {
+        final response = await http.post(
+          Uri.parse('http://127.0.0.1:8080/login'), // เปลี่ยนเป็น IP Emulator
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            'username': _usernameController.text,
+            'password': _passwordController.text,
+          }),
+        );
+
         setState(() {
           _isLoading = false;
         });
 
-        if (_usernameController.text == 'admin' &&
-            _passwordController.text == '1234') {
+        if (response.statusCode == 200) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => Home()),
@@ -57,13 +69,26 @@ class _LoginPageState extends State<LoginPage> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Invalid username or password'),
+            SnackBar(
+              content: Text(response.body.isNotEmpty
+                  ? response.body
+                  : 'Login failed. Please try again.'),
               backgroundColor: Colors.red,
             ),
           );
         }
-      });
+      } catch (error) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Unable to connect to the server.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -95,7 +120,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 10),
 
-                  // pageName
+                  // Page Name
                   Text(
                     'Login',
                     style: GoogleFonts.bebasNeue(
@@ -163,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Login button
+                  // Login Button
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: GestureDetector(
@@ -177,23 +202,23 @@ class _LoginPageState extends State<LoginPage> {
                         child: Center(
                           child: _isLoading
                               ? const CircularProgressIndicator(
-                            color: Colors.white,
-                          )
+                                  color: Colors.white,
+                                )
                               : const Text(
-                            'Sign in',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
+                                  'Sign in',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
 
-                  // Not member
+                  // Not a Member
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

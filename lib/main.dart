@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:up_transit/page/Bus.dart';
 import 'package:up_transit/page/Calls.dart';
@@ -21,12 +23,12 @@ class LinkPage extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/login',
       routes: {
-        '/login': (context) => LoginPage(),
-        '/News': (context) => News(),
-        '/Bus': (context)  => Bus(),
-        '/': (context) => Home(),
-        '/Map': (context) => Map(),
-        '/Contact': (context) => Contact(),
+        '/login': (context) =>  LoginPage(),
+        '/News': (context) =>  News(),
+        '/Bus': (context)  =>  Bus(),
+        '/': (context) =>  Home(),
+        '/Map': (context) =>  Map(),
+        '/Contact': (context) =>  Contact(),
         
       },
     );

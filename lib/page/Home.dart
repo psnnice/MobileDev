@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'BasePage.dart';
 
 class Home extends StatelessWidget {
+  const Home({super.key});
+
   @override
   Widget build(BuildContext context) {
     // Get the height of the screen
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    void _showImageDialog(BuildContext context) {
+    void showImageDialog(BuildContext context) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -19,7 +20,7 @@ class Home extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
+                SizedBox(
                   width: screenWidth,
                   height: screenHeight * 0.75, // Set height to 75% of screen height
                   child: InteractiveViewer(
@@ -46,7 +47,7 @@ class Home extends StatelessWidget {
 
 return BasePage(
   body: Container(
-    color: Color(0xFFDBE4EB), // เปลี่ยนสีพื้นหลังเป็น DBE4EB
+    color: const Color(0xFFDBE4EB), // เปลี่ยนสีพื้นหลังเป็น DBE4EB
     child: Center(
       child: SizedBox(
         width: screenWidth,
@@ -58,7 +59,7 @@ return BasePage(
             const SizedBox(height: 5),
             GestureDetector(
               onTap: () {
-                _showImageDialog(context);
+                showImageDialog(context);
               },
               child: Image(
                 image: const AssetImage('assets/upmap.jpg'),
@@ -69,14 +70,14 @@ return BasePage(
             const SizedBox(height: 5),
             Container(
               padding: const EdgeInsets.all(7),
-              color: Color(0xFFC0D3E0),
+              color: const Color(0xFFC0D3E0),
               child: ListTile(
-                leading: Icon(Icons.article,
+                leading: const Icon(Icons.article,
                 size: 40,
                 color: Color(0xFF8D38C9),
                 ),
-                title: Text('News'),
-                subtitle: Text(
+                title: const Text('News'),
+                subtitle: const Text(
                   'ข่าวสารประชาสัมพันธ์และกิจกรรม ภายในมหาวิทยาลัยพะเยา',
                   style: TextStyle(color: Colors.black54),
                 ),
@@ -88,13 +89,13 @@ return BasePage(
             const SizedBox(height: 5),
             Container(
               padding: const EdgeInsets.all(7),
-              color: Color(0xFFC0D3E0),
+              color: const Color(0xFFC0D3E0),
               child: ListTile(
-                leading: Icon(Icons.directions_bus,
+                leading: const Icon(Icons.directions_bus,
                 size: 40,
                 color: Color(0xFF8D38C9),),
-                title: Text('Bus'),
-                subtitle: Text(
+                title: const Text('Bus'),
+                subtitle: const Text(
                   'แสดงการเดินรถของรถเมล์ภายในมหาวิทยาลัยพะเยา เเบบเรียลไทม์',
                   style: TextStyle(color: Colors.black54),
                 ),
@@ -106,13 +107,13 @@ return BasePage(
             const SizedBox(height: 5),
             Container(
               padding: const EdgeInsets.all(7),
-              color: Color(0xFFC0D3E0),
+              color: const Color(0xFFC0D3E0),
               child: ListTile(
-                leading: Icon(Icons.map,
+                leading: const Icon(Icons.map,
                 size: 40,
                 color: Color(0xFF8D38C9),),
-                title: Text('Route Map'),
-                subtitle: Text(
+                title: const Text('Route Map'),
+                subtitle: const Text(
                   'แสดงเส้นทางการเดินรถของรถเมล์ภายในมหาวิทยาลัยพะเยา',
                   style: TextStyle(color: Colors.black54),
                 ),
@@ -124,13 +125,13 @@ return BasePage(
             const SizedBox(height: 5),
             Container(
               padding: const EdgeInsets.all(7),
-              color: Color(0xFFC0D3E0),
+              color: const Color(0xFFC0D3E0),
               child: ListTile(
-                leading: Icon(Icons.contact_mail,
+                leading: const Icon(Icons.contact_mail,
                 size: 40,
                 color: Color(0xFF8D38C9),),
-                title: Text('Contact'),
-                subtitle: Text(
+                title: const Text('Contact'),
+                subtitle: const Text(
                   'ช่องทางการติดต่อภายในมหาวิทยาลัยพะเยา เบื้องต้น',
                   style: TextStyle(color: Colors.black54),
                 ),

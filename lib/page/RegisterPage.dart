@@ -1,9 +1,13 @@
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:up_transit/page/LoginPage.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -17,53 +21,65 @@ class _RegisterPageState extends State<RegisterPage> {
 
   bool _isLoading = false;
 
-  void _register() {
+  // func Register
+  Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      // Mock registration process
-      Future.delayed(const Duration(seconds: 1), () {
+      try {
+        
+        final response = await http.post(
+          Uri.parse('http://127.0.0.1:8080/register'), 
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            'username': _usernameController.text,
+            'password': _passwordController.text,
+          }),
+        );
+
         setState(() {
           _isLoading = false;
         });
-
-        if (_passwordController.text == _confirmPasswordController.text) {
-          // Registration successful
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Registration Successful'),
-                content: const Text('Your account has been successfully created.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context); // ปิด Dialog
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
-                        ),
-                      ); // กลับไปหน้า Login
-                    },
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-        } else {
-          // Registration failed
+            // การลงทะเบียนสำเร็จ
+        if (response.statusCode == 201) { 
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Passwords do not match'),
+              content: Text('Registration Successful'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // กลับไปหน้า Login
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        } else {
+          // แสดงข้อผิดพลาดจากเซิร์ฟเวอร์
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.body.isNotEmpty
+                  ? response.body
+                  : 'Registration failed. Please try again.'),
               backgroundColor: Colors.red,
             ),
           );
         }
-      });
+      } catch (error) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // แสดงข้อความเมื่อไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Unable to connect to the server.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -79,14 +95,14 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
+                  // โลโก้
                   Image.asset(
                     'assets/images/Logos/Logo.png',
                     scale: 2.75,
                   ),
                   const SizedBox(height: 5),
 
-                  // Name app
+                  // ชื่อแอป
                   Text(
                     'UP Transit',
                     style: GoogleFonts.bebasNeue(
@@ -94,7 +110,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
 
-                  // pageName
+                  // ชื่อหน้า
                   Text(
                     'Register',
                     style: GoogleFonts.bebasNeue(
@@ -103,7 +119,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Username TextField
+                  // ช่องกรอก Username
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: Container(
@@ -132,7 +148,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Password TextField
+                  // ช่องกรอก Password
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: Container(
@@ -162,7 +178,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Confirm Password TextField
+                  // ช่องกรอก Confirm Password
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: Container(
@@ -194,7 +210,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Register button
+                  // ปุ่มลงทะเบียน
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: GestureDetector(
@@ -208,28 +224,28 @@ class _RegisterPageState extends State<RegisterPage> {
                         child: Center(
                           child: _isLoading
                               ? const CircularProgressIndicator(
-                            color: Colors.white,
-                          )
+                                  color: Colors.white,
+                                )
                               : const Text(
-                            'Sign up',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
+                                  'Sign up',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 20),
 
-                  // Not member
+                  // ข้อความลิงก์กลับไปหน้า Login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        'Have a member ',
+                        'Already have an account?',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
