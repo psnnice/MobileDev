@@ -23,6 +23,17 @@ func RegisterHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("Username and password are required")
 	}
 
+	// ตรวจสอบว่ามี username นี้อยู่แล้วหรือไม่
+	var exists bool
+    err := utils.DB.QueryRow("SELECT EXISTS (SELECT 1 FROM users WHERE username=$1)", user.Username).Scan(&exists)
+    if err != nil {
+        return c.Status(fiber.StatusInternalServerError).SendString("Database error")
+    }
+
+    if exists {
+        return c.Status(409).SendString("Username already exists")
+    }
+
 	// แฮชรหัสผ่าน
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {

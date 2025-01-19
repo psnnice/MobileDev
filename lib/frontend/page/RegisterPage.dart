@@ -1,12 +1,10 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'LoginPage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const ip = "192.168.1.202";//อย่าลืมเปลี่ยน ip 
+const ip = "192.168.1.202"; // อย่าลืมเปลี่ยน ip
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -31,9 +29,8 @@ class _RegisterPageState extends State<RegisterPage> {
       });
 
       try {
-        
         final response = await http.post(
-          Uri.parse('http://$ip:8080/register'), 
+          Uri.parse('http://$ip:8080/register'),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
             'username': _usernameController.text,
@@ -44,8 +41,8 @@ class _RegisterPageState extends State<RegisterPage> {
         setState(() {
           _isLoading = false;
         });
-            // การลงทะเบียนสำเร็จ
-        if (response.statusCode == 201) { 
+
+        if (response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Registration Successful'),
@@ -58,8 +55,16 @@ class _RegisterPageState extends State<RegisterPage> {
             context,
             MaterialPageRoute(builder: (context) => const LoginPage()),
           );
+        } 
+        
+        if (response.statusCode == 409) { // รหัส 409 สำหรับกรณี username ซ้ำ
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Username already exists'),
+              backgroundColor: Colors.orange,
+            ),
+          );
         } else {
-          // แสดงข้อผิดพลาดจากเซิร์ฟเวอร์
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(response.body.isNotEmpty
@@ -74,7 +79,6 @@ class _RegisterPageState extends State<RegisterPage> {
           _isLoading = false;
         });
 
-        // แสดงข้อความเมื่อไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Unable to connect to the server.'),
@@ -97,22 +101,17 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // โลโก้
                   Image.asset(
                     'assets/images/Logos/Logo.png',
                     scale: 2.75,
                   ),
                   const SizedBox(height: 5),
-
-                  // ชื่อแอป
                   Text(
                     'UP Transit',
                     style: GoogleFonts.bebasNeue(
                       fontSize: 52,
                     ),
                   ),
-
-                  // ชื่อหน้า
                   Text(
                     'Register',
                     style: GoogleFonts.bebasNeue(
@@ -120,8 +119,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // ช่องกรอก Username
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: Container(
@@ -149,8 +146,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // ช่องกรอก Password
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: Container(
@@ -179,8 +174,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // ช่องกรอก Confirm Password
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: Container(
@@ -211,8 +204,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // ปุ่มลงทะเบียน
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 25.0),
                     child: GestureDetector(
@@ -241,8 +232,6 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // ข้อความลิงก์กลับไปหน้า Login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
