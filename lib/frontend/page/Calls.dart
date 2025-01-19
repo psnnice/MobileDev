@@ -1,35 +1,52 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
-import 'package:flutter/services.dart'; // ใช้สำหรับโหลดไฟล์ JSON
-import 'dart:convert';// ใช้สำหรับแปลง JSON
+import 'package:http/http.dart' as http; // ใช้สำหรับดึงข้อมูลจาก API
+import 'dart:convert'; // ใช้สำหรับแปลง JSON
 import 'Basepage.dart';
+
+const ip = "192.168.1.202"; // อย่าลืมเปลี่ยน IP 
+
 class Contact extends StatefulWidget {
   const Contact({super.key});
 
   @override
-  
   _ContacPageState createState() => _ContacPageState();
 }
 
 class _ContacPageState extends State<Contact> {
-  List<dynamic> contactData = []; // เก็บข้อมูลข่าวจาก JSON
+  List<dynamic> contactData = []; // เก็บข้อมูลข่าวจาก API
 
   @override
   void initState() {
     super.initState();
-    _loadJson(); // โหลด JSON เมื่อเริ่มต้นแอป
+    _fetchContact(); // ดึงข้อมูลเมื่อเริ่มต้นแอป
   }
 
-  // ฟังก์ชันสำหรับโหลด JSON
-  Future<void> _loadJson() async {
-    final String response =
-    await rootBundle.loadString('assets/jsonFile/Contact.json'); // โหลด JSON
-    final List<dynamic> data = json.decode(response); // แปลง JSON เป็นออบเจกต์ Dart
-    setState(() {
-      contactData = data; // เก็บข้อมูลไว้ใน state
-    });
+  // ฟังก์ชันดึงข้อมูลจาก API
+  Future<void> _fetchContact() async {
+    try {
+      final response = await http.get(Uri.parse('http://$ip:8080/contacts')); // URL ของ API
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        setState(() {
+          // แปลง null เป็นช่องว่าง
+          contactData = data.map((contact) {
+            return {
+              "imagePath"     : contact["imagePath"]    ?? "",
+              "profileImage"  : contact["profileImage"] ?? "",
+              "title"         : contact["title"]        ?? "",
+              "email"         : contact["email"]        ?? "",
+              "phoneNumber"   : contact["phoneNumber"]  ?? "",
+              "url"           : contact["url"]          ?? "",
+            };
+          }).toList();
+        });
+      } else {
+        throw Exception('Failed to load contacts');
+      }
+    } catch (e) {
+      debugPrint('Error fetching contacts: $e');
+    }
   }
 
   @override
@@ -38,25 +55,26 @@ class _ContacPageState extends State<Contact> {
       body: contactData.isEmpty
           ? const Center(child: CircularProgressIndicator()) // แสดง loading ขณะโหลด
           : ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: contactData.length,
-        itemBuilder: (context, index) {
-          final contact = contactData[index];
-          return _buildContacCard(
-            imagePath: contact['imagePath'],
-            profileImage: contact['profileImage'],
-            title: contact['title'],
-            email: contact['email'],
-            phoneNumber: contact['phoneNumber'],
-            url: contact['url'],
-          );
-        },
-      ), index: 4,
+              padding: const EdgeInsets.all(16.0),
+              itemCount: contactData.length,
+              itemBuilder: (context, index) {
+                final contact = contactData[index];
+                return _buildContactCard(
+                  imagePath     : contact['imagePath'],
+                  profileImage  : contact['profileImage'],
+                  title         : contact['title'],
+                  email         : contact['email'],
+                  phoneNumber   : contact['phoneNumber'],
+                  url           : contact['url'],
+                );
+              },
+            ),
+      index: 4,
     );
   }
 
-  // ฟังก์ชันสร้างการ์ดข่าว
-  Widget _buildContacCard({
+  // ฟังก์ชันสร้างการ์ด
+  Widget _buildContactCard({
     required String imagePath,
     required String profileImage,
     required String title,
@@ -86,14 +104,14 @@ class _ContacPageState extends State<Contact> {
                     topLeft: Radius.circular(8),
                     topRight: Radius.circular(8),
                   ),
-                  child: Image.asset(
+                  child: Image.network(
                     imagePath,
                     fit: BoxFit.fill,
                     width: double.infinity,
                     height: 150,
+                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 150),
                   ),
                 ),
-                // ข้อความหัวข้อและเนื้อหา
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 40.0),
                   child: Column(
@@ -104,14 +122,15 @@ class _ContacPageState extends State<Contact> {
                         children: [
                           // รูปภาพพร้อมกรอบวงกลม
                           ClipOval(
-                            child: Image.asset(
-                              profileImage, // ใส่รูปภาพที่ต้องการ
-                              width: 40, // ขนาดของวงกลม
+                            child: Image.network(
+                              profileImage,
+                              width: 40,
                               height: 40,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, size: 40),
                             ),
                           ),
-                          const SizedBox(width: 20), // เว้นระยะห่างระหว่าง Icon และ Title
+                          const SizedBox(width: 20),
                           Expanded(
                             child: Text(
                               title,
@@ -124,51 +143,42 @@ class _ContacPageState extends State<Contact> {
                         ],
                       ),
                       const SizedBox(height: 20),
-
-
-                      // email + Icon
                       if (email.trim().isNotEmpty)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.email_rounded , color: Colors.black),
-                          const SizedBox(width: 10), // เว้นระยะห่างระหว่าง Icon และ Text
-                          Expanded(
-                            child: Text(
-                              email,
-                              style: const TextStyle(fontSize: 16),
+                        Row(
+                          children: [
+                            const Icon(Icons.email_rounded, color: Colors.black),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                email,
+                                style: const TextStyle(fontSize: 16),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                       const SizedBox(height: 10),
-
-                      //phoneNumber + icon
                       if (phoneNumber.trim().isNotEmpty)
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Icon(Icons.phone_forwarded_rounded , color: Colors.black),
-                          const SizedBox(width: 10), // เว้นระยะห่างระหว่าง Icon และ Text
-                          Expanded(
-                            child: Text(
-                              phoneNumber,
-                              style: const TextStyle(fontSize: 16),
+                        Row(
+                          children: [
+                            const Icon(Icons.phone_forwarded_rounded, color: Colors.black),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                phoneNumber,
+                                style: const TextStyle(fontSize: 16),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
                     ],
                   ),
                 ),
               ],
             ),
-            // ใช้ Positioned สำหรับไอคอนมุมล่างขวา
             const Positioned(
-              bottom: 8, // ระยะห่างจากขอบล่าง
-              right: 8,  // ระยะห่างจากขอบขวา
+              bottom: 8,
+              right: 8,
               child: Row(
-                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     'Read more',

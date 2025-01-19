@@ -3,7 +3,8 @@ package routes
 import (
 	"github.com/gofiber/fiber/v2"
 	"flutter_project/internals/auth"
-	"flutter_project/internals/news/handler"
+	"flutter_project/internals/news"
+	"flutter_project/internals/contacts"
 )
 
 func SetupRoutes(app *fiber.App) {
@@ -12,6 +13,7 @@ func SetupRoutes(app *fiber.App) {
 
 	app.Get("/health", HealthCheckHandler)
 	app.Get("/news", news.GetNewsHandler)
+	app.Get("/contacts", contacts.GetContactHandler)
 }
 
 func HealthCheckHandler(c *fiber.Ctx) error {

@@ -46,11 +46,6 @@ flutter:
   assets:
     - assets/upmap.jpg
     - assets/images/Logos/
-    - assets/images/News/
-    - assets/images/Contact/profileImage/
-    - assets/images/Contact/imagePath/
-    - assets/jsonFile/News.json
-    - assets/jsonFile/Contact.json
     - assets/images/Routes/
 
   # To add assets to your application, add an assets section, like this:
