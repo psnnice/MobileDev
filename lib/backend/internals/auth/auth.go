@@ -2,7 +2,7 @@ package auth
 
 import (
 	"database/sql"
-	"flutter_project/utils"
+	"flutter_project/pkg/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"

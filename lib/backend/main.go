@@ -5,10 +5,10 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
-
-	"flutter_project/utils"
-	"flutter_project/middleware"
-	"flutter_project/routes"
+	
+	"flutter_project/pkg/utils"
+	"flutter_project/pkg/middleware"
+	"flutter_project/pkg/routes"
 )
 
 func main() {
@@ -23,12 +23,13 @@ func main() {
 	utils.InitDB()
 	defer utils.CloseDB()
 
-	// สร้าง Fiber แอป
+	//สร้าง Fiber แอป
 	app := fiber.New()
 
 	// Middleware
 	app.Use(middleware.RateLimiter())
 	app.Use(middleware.Logger())
+	app.Use(middleware.ContentType())
 	
 	// กำหนด Routes
 	routes.SetupRoutes(app)

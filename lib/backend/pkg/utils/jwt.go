@@ -12,6 +12,7 @@ var jwtSecret []byte
 
 // โหลดค่า JWT Secret จาก .env
 func init() {
+	
 	// โหลดไฟล์ .env
 	err := godotenv.Load()
 	if err != nil {

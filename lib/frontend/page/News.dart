@@ -1,10 +1,12 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
-import 'package:flutter/services.dart'; // ใช้สำหรับโหลดไฟล์ JSON
-import 'dart:convert';// ใช้สำหรับแปลง JSON
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'Basepage.dart';
+
+const ip = "192.168.1.202";//อย่าลืมเปลี่ยน ip 
 
 class News extends StatefulWidget {
   const News({super.key});
@@ -14,42 +16,56 @@ class News extends StatefulWidget {
 }
 
 class _NewsPageState extends State<News> {
-  List<dynamic> newsData = []; // เก็บข้อมูลข่าวจาก JSON
+  List<dynamic> newsData = []; // เก็บข้อมูลข่าวจากฐานข้อมูล
 
   @override
   void initState() {
     super.initState();
-    _loadJson(); // โหลด JSON เมื่อเริ่มต้นแอป
+    _fetchNews(); // ดึงข้อมูลจากฐานข้อมูลเมื่อเริ่มต้นแอป
   }
 
-  // ฟังก์ชันสำหรับโหลด JSON
-  Future<void> _loadJson() async {
-    final String response =
-    await rootBundle.loadString('assets/jsonFile/News.json'); // โหลด JSON
-    final List<dynamic> data = json.decode(response); // แปลง JSON เป็นออบเจกต์ Dart
-    setState(() {
-      newsData = data; // เก็บข้อมูลไว้ใน state
-    });
-  }
+  // ฟังก์ชันสำหรับดึงข้อมูลจาก API
+  Future<void> _fetchNews() async {
+    try {
+      final response = await http.get(Uri.parse('http://$ip:8080/news'));
 
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        setState(() {
+          newsData = data; // เก็บข้อมูลไว้ใน state
+        });
+      } else {
+        throw Exception('Failed to load news');
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error fetching news: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     return BasePage(
       body: newsData.isEmpty
           ? const Center(child: CircularProgressIndicator()) // แสดง loading ขณะโหลด
           : ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: newsData.length,
-        itemBuilder: (context, index) {
-          final news = newsData[index];
-          return _buildContacCard(
-            imagePath: news['imagePath'],
-            title: news['title'],
-            content: news['content'],
-            url: news['url'],
-          );
-        },
-      ), index: 0,
+              padding: const EdgeInsets.all(16.0),
+              itemCount: newsData.length,
+              itemBuilder: (context, index) {
+                final news = newsData[index];
+                return _buildContacCard(
+                  imagePath :  news['imagePath'],
+                  title     :  news['title'],
+                  content   :  news['content'],
+                  url       :  news['url'],
+                );
+              },
+            ),
+      index: 0,
     );
   }
 
@@ -82,11 +98,20 @@ class _NewsPageState extends State<News> {
                     topLeft: Radius.circular(8),
                     topRight: Radius.circular(8),
                   ),
-                  child: Image.asset(
+                  child: Image.network(
                     imagePath,
                     fit: BoxFit.fill,
                     width: double.infinity,
                     height: 150,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey,
+                        height: 150,
+                        child: const Center(
+                          child: Icon(Icons.broken_image, size: 50),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 // ข้อความหัวข้อและเนื้อหา
