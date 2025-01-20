@@ -248,6 +248,9 @@ class _ContacPageState extends State<Contact> {
           );
           if (confirm) {
             deleteContact(context, id);
+            Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => Contact()),
+                  );
           }
         },
       ),
