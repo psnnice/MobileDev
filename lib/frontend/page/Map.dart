@@ -167,8 +167,27 @@ class _MapState extends State<Map> {
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        'Route 1 Description',
+                      'สาย 1 หน้ามหาวิทยาลัย - อาคารเรียนรวม \n\nสถานีที่ผ่าน\n',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                      const Text(
+                                '1.สถานีทางขึ้น - ลงรถหน้า ม.\n'
+                                '2.สถานีหน้าโรงพยาบาล มพ. (ขาเข้า-ออก)\n'
+                                '3.สถานีหน้าคณะทันตเเพทยศาสตร์ (ขาเข้า-ออก)\n'
+                                '4.สถานีเรือนเอื้องคำ (ขาเข้า-ออก)\n'
+                                '5.สถานีคณะวิศวกรรมศาสตร์ (ขาเข้า-ออก)\n'
+                                '6.สถานีหอประชุมพญางำเมือง\n'
+                                '7.สถานีอาคารอธิการ\n'
+                                '8.สถานีตึกคณะศิลปศาสตร์\n'
+                                '9.สถานีตึกคณะวิทยาศาสตร์\n'
+                                '10.สถานีอาคารเรียนรวม\n',
                         style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                      const Text(
+                      '*หมายเหตุ* ช่วงเวลา 06:00 - 13:50 จะไม่ผ่านสถานี 10.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -201,7 +220,20 @@ class _MapState extends State<Map> {
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        'Route 2 Description',
+                      'สาย 2 สนามกีฬา - อาคารเรียนรวม \n\nสถานีที่ผ่าน\n',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                      const Text(
+                                '1.สถานีเวียงพะเยา - หอใน (ขาเข้า-ออก)\n'
+                                '2.สถานีอาคารสงวนเสริมศรี (ขาเข้า-ออก)\n'
+                                '3.สถานีโรงเรียนสาธิตมหาวิทยาลัยพะเยา\n'
+                                '4.สถานีตึก 99 ปี อาคารอุบาลี (ขาเข้า-ออก)\n'
+                                '5.สถานีตึกคณะศิลปศาสตร์\n'
+                                '6.สถานีตึกคณะวิทยาศาสตร์\n'
+                                '7.สถานีหอประชุมพญางำเมือง\n'
+                                '8.สถานีอาคารอธิการ\n'
+                                '9.สถานีอาคารเรียนรวม\n',
                         style: TextStyle(fontSize: 16, color: Colors.black),
                       ),
                     ],
@@ -235,7 +267,19 @@ class _MapState extends State<Map> {
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        'Route 3 Description',
+                      'สาย 3 ทางออกประตู 3 \n\nสถานีที่ผ่าน\n',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
+                      const Text(
+                                '1.สถานีขึ้น - ลงรถ ประตู 3\n'
+                                '2.สถานีคณะ ICT (ทางเข้าโรงอาหาร)\n'
+                                '3.สถานีหอประชุมพญางำเมือง\n'
+                                '4.สถานีอาคารอธิการ\n'
+                                '5.สถานีตึกคณะศิลปศาสตร์\n'
+                                '6.สถานีตึกคณะวิทยาศาสตร์\n'
+                                '7.สถานีคณะวิศวกรรมศาสตร์ (ขาออก)\n'
+                                '8.สถานีหน้าคณะ ICT (ทางเข้าชั้น 3)\n',
                         style: TextStyle(fontSize: 16, color: Colors.black),
                       ),
                     ],

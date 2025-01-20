@@ -5,7 +5,6 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:up_transit/frontend/page/Basepage.dart';
 
-
 class Bus extends StatefulWidget {
   @override
   _BusPageState createState() => _BusPageState();
@@ -23,6 +22,7 @@ class _BusPageState extends State<Bus> {
   void initState() {
     super.initState();
     _loadRoutes();
+    _loadBusStops();
   }
 
   Future<void> _loadRoutes() async {
@@ -59,6 +59,56 @@ class _BusPageState extends State<Bus> {
     final data = await rootBundle.loadString(path);
     final jsonResult = json.decode(data) as List;
     return jsonResult.map((point) => LatLng(point['lat'], point['lng'])).toList();
+  }
+
+  Future<void> _loadBusStops() async {
+    final busStopIcon = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration(size: Size(10, 10)), // ปรับขนาดของไอคอนที่นี่
+      'assets/images/Logos/stop.png',
+    );
+
+    final busStops = [
+      {'name': 'สถานีทางขึ้นรถหน้า ม.', 'lat': 19.030551, 'lng': 99.922942},
+      {'name': 'สถานีลงรถหน้า ม.','lat': 19.030878, 'lng': 99.922976},
+      {'name': 'สถานีหน้าโรงพยาบาล มพ. (ขาเข้า)','lat': 19.030488, 'lng': 99.920837 },
+      {'name': 'สถานีหน้าโรงพยาบาล มพ. (ขาออก)', 'lat': 19.030726, 'lng': 99.920976},
+      {'name': 'สถานีหน้าคณะทันตเเพทยศาสตร์ (ขาเข้า)', 'lat': 19.029911, 'lng': 99.915225},
+      {'name': 'สถานีหน้าคณะทันตเเพทยศาสตร์ (ขาออก)', 'lat': 19.030149, 'lng': 99.915284},
+      {'name': 'สถานีเรือนเอื้องคำ (ขาเข้า)', 'lat': 19.028564, 'lng': 99.906768},
+      {'name': 'สถานีเรือนเอื้องคำ (ขาออก)', 'lat': 19.028801, 'lng': 99.906795},
+      {'name': 'สถานีคณะวิศวกรรมศาสตร์ (ขาเข้า).','lat': 19.030526, 'lng': 99.901227},
+      {'name': 'สถานีคณะวิศวกรรมศาสตร์ (ขาออก)','lat': 19.030810, 'lng':  99.901198},
+      {'name': 'สถานีหน้าคณะ ICT (ทางเข้าชั้น 3).','lat': 19.028470, 'lng': 99.899836},
+      {'name': 'สถานีคณะ ICT (ทางเข้าโรงอาหาร)','lat': 19.027074, 'lng': 99.899526},
+      {'name': 'สถานีคณะ ICT (ทางเข้าโรงอาหาร)','lat': 19.026846, 'lng': 99.899623},
+      {'name': 'สถานีขึ้น - ลงรถ ประตู 3','lat': 19.022673, 'lng': 99.895429},
+      {'name': 'สถานีหอประชุมพญางำเมือง','lat': 19.029995, 'lng': 99.897714},
+      {'name': 'สถานีอาคารอธิการ','lat': 19.029027, 'lng': 99.896088},
+      {'name': 'สถานีตึกคณะศิลปศาสตร์','lat': 19.029717, 'lng': 99.895682},
+      {'name': 'สถานีตึกคณะวิทยาศาสตร์','lat': 19.030665, 'lng': 99.897614},
+      {'name': 'สถานีอาคารเรียนรวม','lat': 19.025723, 'lng': 99.894892},
+      {'name': 'สถานีตึก 99 ปี อาคารอุบาลี (ขาเข้า)','lat': 19.031813, 'lng': 99.893344},
+      {'name': 'สถานีตึก 99 ปี อาคารอุบาลี (ขาออก)','lat': 19.031993, 'lng': 99.893491},
+      {'name': 'สถานีเวียงพะเยา - หอใน (ขาเข้า)','lat': 19.033013, 'lng': 99.890882},
+      {'name': 'สถานีเวียงพะเยา - หอใน (ขาออก)','lat': 19.033203, 'lng': 99.890911},
+      {'name': 'สถานีอาคารสงวนเสริมศรี (ขาเข้า)','lat': 19.034110, 'lng': 99.886149},
+      {'name': 'สถานีอาคารสงวนเสริมศรี (ขาออก)','lat': 19.034244, 'lng': 99.886324},
+      {'name': 'สถานีโรงเรียนสาธิตมหาวิทยาลัยพะเยา','lat': 19.034375, 'lng': 99.884256},
+      // เพิ่มป้ายสถานีรถเมล์อื่นๆ ที่นี่
+    ];
+
+    setState(() {
+      for (var stop in busStops) {
+        _markers.add(Marker(
+          markerId: MarkerId(stop['name'] as String),
+          position: LatLng(stop['lat'] as double, stop['lng'] as double),
+          icon: busStopIcon,
+          infoWindow: InfoWindow(
+            title: stop['name'] as String,
+          ),
+        ));
+      }
+    });
   }
 
   void _toggleRoute(String route) {
@@ -106,7 +156,7 @@ class _BusPageState extends State<Bus> {
             markers: _markers,
           ),
           Positioned(
-            top: 10,
+            top: 20,
             left: 0,
             right: 0,
             child: Row(
@@ -114,8 +164,8 @@ class _BusPageState extends State<Bus> {
               children: [
                 TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor: _showRoute1 ? const Color.fromARGB(255, 33, 149, 243) : const Color.fromARGB(255, 255, 255, 255),
-                    foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                    backgroundColor: _showRoute1 ? Colors.blue : Colors.white,
+                    foregroundColor: Colors.black,
                   ),
                   onPressed: () => _toggleRoute('route1'),
                   child: Text(' สาย 1 '),

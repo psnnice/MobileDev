@@ -37,7 +37,7 @@ dev_dependencies:
     sdk: flutter
   photo_view: ^0.13.0
   google_maps_flutter: ^2.0.6
-  
+
   flutter_lints: ^4.0.0
 
 flutter:
@@ -46,6 +46,7 @@ flutter:
   assets:
     - assets/upmap.jpg
     - assets/images/Logos/
+    - assets/images/Logos/stop.png
     - assets/images/Routes/
     - assets/jsonFile/route1.json
     - assets/jsonFile/route2.json
