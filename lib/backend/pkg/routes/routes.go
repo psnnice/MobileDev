@@ -12,14 +12,12 @@ import (
 func SetupRoutes(app *fiber.App) {
 	app.Post("/register", auth.RegisterHandler)
 	app.Post("/login", auth.LoginHandler)
+
 	app.Post("/DataBus", bus.InsertDeviceDataHandler)
-	app.Get("/DataBus", bus.GetDeviceDataHandler) // ใช้ endpoint เดียวกันสำหรับ GET และ POST
-
-	app.Get("/health", HealthCheckHandler)
+	app.Get("/DataBus", bus.GetDeviceDataHandler)
+	// ใช้ endpoint เดียวกันสำหรับ GET และ POST
 	app.Get("/news", news.GetNewsHandler)
-	app.Get("/contacts", contacts.GetContactHandler)
-}
 
-func HealthCheckHandler(c *fiber.Ctx) error {
-	return c.Status(fiber.StatusOK).SendString("Server is running")
+	app.Get("/contacts", contacts.GetContactHandler)
+
 }

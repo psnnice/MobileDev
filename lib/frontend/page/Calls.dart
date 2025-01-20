@@ -2,7 +2,9 @@ import 'dart:convert'; // ใช้สำหรับแปลง JSON
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // ใช้สำหรับดึงข้อมูลจาก API
+import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
+import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
 
 import 'Basepage.dart';
@@ -54,24 +56,41 @@ class _ContacPageState extends State<Contact> {
 
   @override
   Widget build(BuildContext context) {
+    String userRole = Provider.of<UserProvider>(context).role;
+    
     return BasePage(
-      body: contactData.isEmpty
-          ? const Center(child: CircularProgressIndicator()) // แสดง loading ขณะโหลด
-          : ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: contactData.length,
-              itemBuilder: (context, index) {
-                final contact = contactData[index];
-                return _buildContactCard(
-                  imagePath     : contact['imagePath'],
-                  profileImage  : contact['profileImage'],
-                  title         : contact['title'],
-                  email         : contact['email'],
-                  phoneNumber   : contact['phoneNumber'],
-                  url           : contact['url'],
-                );
-              },
+      body: Stack(
+        children: [
+          contactData.isEmpty
+              ? const Center(child: CircularProgressIndicator()) // แสดง loading ขณะโหลด
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: contactData.length,
+                  itemBuilder: (context, index) {
+                    final contact = contactData[index];
+                    return _buildContactCard(
+                      imagePath: contact['imagePath'],
+                      profileImage: contact['profileImage'],
+                      title: contact['title'],
+                      email: contact['email'],
+                      phoneNumber: contact['phoneNumber'],
+                      url: contact['url'],
+                    );
+                  },
+                ),
+          if (userRole == 'admin')
+            Positioned(
+              bottom: 16.0,
+              right: 16.0,
+              child: FloatingActionButton(
+                onPressed: () {
+                  // เพิ่มการทำงานเมื่อกดปุ่ม
+                },
+                child: Icon(Icons.add),
+              ),
             ),
+        ],
+      ),
       index: 4,
     );
   }

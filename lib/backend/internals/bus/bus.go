@@ -31,7 +31,7 @@ func InsertDeviceDataHandler(c *fiber.Ctx) error {
 		if err != nil {
 			return c.Status(http.StatusBadRequest).SendString("Invalid timestamp format: " + err.Error())
 		}
-
+		// เรียกใช้ฟังก์ชัน InsertDeviceData สำหรับแต่ละ deviceData
 		if err := InsertDeviceData(deviceData); err != nil {
 			return c.Status(http.StatusInternalServerError).SendString("Failed to insert data: " + err.Error())
 		}
@@ -41,6 +41,7 @@ func InsertDeviceDataHandler(c *fiber.Ctx) error {
 }
 
 func InsertDeviceData(deviceData DeviceData) error {
+
 	_, err := utils.DB.Exec(`
         INSERT INTO device_data (device_id, latitude, longitude, device_count, timestamp)
         VALUES ($1, $2, $3, $4, $5)

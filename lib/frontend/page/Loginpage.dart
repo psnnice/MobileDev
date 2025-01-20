@@ -2,7 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
+import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'Home.dart';
 import 'RegisterPage.dart';
 import 'package:http/http.dart' as http;
@@ -62,7 +64,9 @@ class _LoginPageState extends State<LoginPage> {
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
           final role = data['role'];// ดึง role จาก response
-        
+          
+          Provider.of<UserProvider>(context, listen: false).setRole(role);
+
           if(role == 'user' || role == 'admin'){
             Navigator.pushReplacement(
               context,
