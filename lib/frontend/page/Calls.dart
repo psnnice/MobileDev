@@ -5,9 +5,10 @@ import 'package:http/http.dart' as http; // ใช้สำหรับดึง
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/deleteFunction/DeleteContact.dart';
+import 'package:up_transit/frontend/page/postFunction/AddContact.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
-import 'package:up_transit/frontend/page/postFunction/AddContact.dart';
+
 import 'Basepage.dart';
 
 var ip = Config.ip; // อย่าลืมเปลี่ยน IP
@@ -209,25 +210,49 @@ class _ContacPageState extends State<Contact> {
               
             ),
             if (userRole == 'admin')
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color.fromARGB(171, 255, 255, 255)),
-                  color: const Color.fromARGB(226, 255, 255, 255),
-                ),
-                child: IconButton(
-                  color: Colors.red,
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                      deleteContact(context, id);
-                    // Add your delete functionality here
-                  },
-                ),
-              ),
-            ),
+  Positioned(
+    top: 8,
+    right: 8,
+    child: Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color.fromARGB(171, 255, 255, 255)),
+        color: const Color.fromARGB(226, 255, 255, 255),
+      ),
+      child: IconButton(
+        color: Colors.red,
+        icon: const Icon(Icons.delete),
+        onPressed: () async {
+          bool confirm = await showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Confirm Deletion'),
+                content: Text('Are you sure you want to delete this contact?'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    child: Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    child: Text('Delete'),
+                  ),
+                ],
+              );
+            },
+          );
+          if (confirm) {
+            deleteContact(context, id);
+          }
+        },
+      ),
+    ),
+  ),
             const Positioned(
               bottom: 8,
               right: 8,
