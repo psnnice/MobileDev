@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // ใช้สำหรับดึงข้อมูลจาก API
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
+import 'package:up_transit/frontend/page/deleteFunction/DeleteContact.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
 import 'package:up_transit/frontend/page/postFunction/AddContact.dart';
@@ -59,6 +60,7 @@ class _ContacPageState extends State<Contact> {
   Widget build(BuildContext context) {
     String userRole = Provider.of<UserProvider>(context).role;
     
+
     return BasePage(
       body: Stack(
         children: [
@@ -70,6 +72,7 @@ class _ContacPageState extends State<Contact> {
                   itemBuilder: (context, index) {
                     final contact = contactData[index];
                     return _buildContactCard(
+                      id: contact['id'],
                       imagePath: contact['imagePath'],
                       profileImage: contact['profileImage'],
                       title: contact['title'],
@@ -98,13 +101,18 @@ class _ContacPageState extends State<Contact> {
 
   // ฟังก์ชันสร้างการ์ด
   Widget _buildContactCard({
+    required int id,
     required String imagePath,
     required String profileImage,
     required String title,
     required String email,
     required String phoneNumber,
     required String url,
-  }) {
+  }) 
+
+  
+  {
+    String userRole = Provider.of<UserProvider>(context).role; // เก็บข้อมูลข่าวจาก API
     return GestureDetector(
       onTap: () async {
         if (await canLaunchUrl(Uri.parse(url))) {
@@ -193,16 +201,39 @@ class _ContacPageState extends State<Contact> {
                             ),
                           ],
                         ),
+                        
                     ],
                   ),
                 ),
               ],
+              
+            ),
+            if (userRole == 'admin')
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color.fromARGB(171, 255, 255, 255)),
+                  color: const Color.fromARGB(226, 255, 255, 255),
+                ),
+                child: IconButton(
+                  color: Colors.red,
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                      deleteContact(context, id);
+                    // Add your delete functionality here
+                  },
+                ),
+              ),
             ),
             const Positioned(
               bottom: 8,
               right: 8,
               child: Row(
                 children: [
+                  
                   Text(
                     'Read more',
                     style: TextStyle(fontSize: 16),

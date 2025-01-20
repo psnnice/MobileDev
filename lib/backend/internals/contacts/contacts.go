@@ -105,6 +105,27 @@ func InsertContactHandler(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).SendString("Contact inserted successfully")
 }
 
+func DeleteContact(db *sql.DB, id int) error {
+	query := "DELETE FROM contacts WHERE id = $1"
+	_, err := db.Exec(query, id)
+	return err
+}
+
+// DeleteContactHandler handles the deletion of a contact
+func DeleteContactHandler(c *fiber.Ctx) error {
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(http.StatusBadRequest).SendString("Invalid contact ID")
+	}
+
+	// Call DeleteContact function to delete the contact
+	if err := DeleteContact(utils.DB, id); err != nil {
+		return c.Status(http.StatusInternalServerError).SendString("Failed to delete contact: " + err.Error())
+	}
+
+	return c.Status(http.StatusOK).SendString("Contact deleted successfully")
+}
+
 // Helper ฟังก์ชันสำหรับจัดการ NullString
 func nullableStringToDefault(ns sql.NullString) string {
 	if ns.Valid {
