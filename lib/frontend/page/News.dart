@@ -1,7 +1,9 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
+import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -50,22 +52,37 @@ class _NewsPageState extends State<News> {
   
   @override
   Widget build(BuildContext context) {
+
+    String userRole = Provider.of<UserProvider>(context).role;
     return BasePage(
-      body: newsData.isEmpty
-          ? const Center(child: CircularProgressIndicator()) // แสดง loading ขณะโหลด
-          : ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: newsData.length,
-              itemBuilder: (context, index) {
-                final news = newsData[index];
-                return _buildContacCard(
-                  imagePath :  news['imagePath'],
-                  title     :  news['title'],
-                  content   :  news['content'],
-                  url       :  news['url'],
-                );
-              },
+      body: Stack(
+      children: [
+        newsData.isEmpty
+            ? const Center(child: CircularProgressIndicator()) // แสดง loading ขณะโหลด
+            : ListView.builder(
+                padding: const EdgeInsets.all(16.0),
+                itemCount: newsData.length,
+                itemBuilder: (context, index) {
+                  final news = newsData[index];
+                  return _buildContacCard(
+                    imagePath: news['imagePath'],
+                    title: news['title'],
+                    content: news['content'],
+                    url: news['url'],
+                  );
+                },
+              ),
+          if (userRole == 'admin') // แสดงเฉพาะ admin
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton(
+              onPressed: _showAddNewsPopup,
+              child: const Icon(Icons.add),
             ),
+          ),
+      ],
+    ),
       index: 0,
     );
   }
@@ -157,6 +174,81 @@ class _NewsPageState extends State<News> {
           ],
         ),
       ),
+    );
+  }
+
+  // ฟังก์ชันสร้าง popup สำหรับเพิ่มข่าว
+  void _showAddNewsPopup() {
+    final TextEditingController titleController     = TextEditingController();
+    final TextEditingController contentController   = TextEditingController();
+    final TextEditingController urlController       = TextEditingController();
+    final TextEditingController imagePathController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add News'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                ),
+                TextField(
+                  controller: contentController,
+                  decoration: const InputDecoration(labelText: 'Content'),
+                ),
+                TextField(
+                  controller: urlController,
+                  decoration: const InputDecoration(labelText: 'URL'),
+                ),
+                TextField(
+                  controller: imagePathController,
+                  decoration: const InputDecoration(labelText: 'Image Path'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // เพิ่มข้อมูลลงฐานข้อมูล
+                final response = await http.post(
+                  Uri.parse('http://$ip:8080/news'),
+                  headers: {"Content-Type": "application/json"},
+                  body: jsonEncode({
+                    'title': titleController.text,
+                    'content': contentController.text,
+                    'url': urlController.text,
+                    'imagePath': imagePathController.text,
+                  }),
+                );
+
+                if (response.statusCode == 201) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('News added successfully')),
+                  );
+                  _fetchNews(); // โหลดข่าวใหม่
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to add news: ${response.body}'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
