@@ -1,9 +1,14 @@
 import 'dart:convert';
-
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:up_transit/frontend/page/Basepage.dart';
+import 'package:up_transit/frontend/page/configip/config.dart';
+import 'package:http/http.dart' as http;
+import 'package:up_transit/frontend/page/mockDataDevices/mockData.dart' as mockData; // นำเข้าไฟล์ mockData.dart
+
+var ip = Config.ip;
 
 class Bus extends StatefulWidget {
   @override
@@ -14,6 +19,8 @@ class _BusPageState extends State<Bus> {
   GoogleMapController? mapController;
   Set<Polyline> _polylines = {};
   Set<Marker> _markers = {};
+  Timer? _timer;
+
   bool _showRoute1 = true;
   bool _showRoute2 = true;
   bool _showRoute3 = true;
@@ -22,7 +29,64 @@ class _BusPageState extends State<Bus> {
   void initState() {
     super.initState();
     _loadRoutes();
-    _loadBusStops();
+    _fetchData();
+    _startFetchingData();
+    mockData.main();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startFetchingData() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      _fetchData();
+    });
+  }
+
+Future<void> _fetchData() async {
+    final deviceMarkers = await _fetchDeviceData();
+    final busStopMarkers = await _loadBusStops();
+    setState(() {
+      _markers.clear();
+      _markers.addAll(deviceMarkers);
+      _markers.addAll(busStopMarkers);
+    });
+  }
+
+
+  
+  Future<Set<Marker>> _fetchDeviceData() async {
+    print('Fetching device data...');
+    final url = Uri.parse('http://$ip:8080/DataBus');
+    final response = await http.get(url);
+
+    final Set<Marker> deviceMarkers = {};
+    
+    if (response.statusCode == 200) {
+      print('Data fetched successfully');
+      final List<dynamic> data = json.decode(response.body);
+      
+      for (var item in data) {
+        final latitude = item['latitude'] is int ? (item['latitude'] as int).toDouble() : item['latitude'];
+        final longitude = item['longitude'] is int ? (item['longitude'] as int).toDouble() : item['longitude'];
+        deviceMarkers.add(Marker(
+          markerId: MarkerId(item['device_id']),
+          position: LatLng(latitude,longitude),
+          infoWindow: InfoWindow(
+            title: 'Device ID: ${item['device_id']}',
+            snippet: 'Device Count: ${item['device_count']}',
+          ),
+          icon: AssetMapBitmap( 'assets/images/Logos/bus.png', width: 24, height: 24),
+        ));
+      }
+    } else {
+      print('Failed to load device data: ${response.statusCode}');
+    }
+
+    return deviceMarkers;
   }
 
   Future<void> _loadRoutes() async {
@@ -61,9 +125,9 @@ class _BusPageState extends State<Bus> {
     return jsonResult.map((point) => LatLng(point['lat'], point['lng'])).toList();
   }
 
-  Future<void> _loadBusStops() async {
+    Future<Set<Marker>> _loadBusStops() async {
     final busStopIcon = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(10, 10)), // ปรับขนาดของไอคอนที่นี่
+      ImageConfiguration(size: Size(48, 48)), // ปรับขนาดของไอคอนที่นี่
       'assets/images/Logos/stop.png',
     );
 
@@ -97,18 +161,20 @@ class _BusPageState extends State<Bus> {
       // เพิ่มป้ายสถานีรถเมล์อื่นๆ ที่นี่
     ];
 
-    setState(() {
-      for (var stop in busStops) {
-        _markers.add(Marker(
-          markerId: MarkerId(stop['name'] as String),
-          position: LatLng(stop['lat'] as double, stop['lng'] as double),
-          icon: busStopIcon,
-          infoWindow: InfoWindow(
-            title: stop['name'] as String,
-          ),
-        ));
-      }
-    });
+    final Set<Marker> busStopMarkers = {};
+
+    for (var stop in busStops) {
+      busStopMarkers.add(Marker(
+        markerId: MarkerId(stop['name'] as String),
+        position: LatLng(stop['lat'] as double, stop['lng'] as double),
+        icon: busStopIcon,
+        infoWindow: InfoWindow(
+          title: stop['name'] as String,
+        ),
+      ));
+    }
+
+    return busStopMarkers;
   }
 
   void _toggleRoute(String route) {
@@ -139,7 +205,6 @@ class _BusPageState extends State<Bus> {
 
   @override
   Widget build(BuildContext context) {
-
     return BasePage(
       body: Stack(
         children: [

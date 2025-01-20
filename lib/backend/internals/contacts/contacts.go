@@ -2,8 +2,8 @@ package contacts
 
 import (
 	"database/sql"
-	"github.com/gofiber/fiber/v2"
 	"flutter_project/pkg/utils"
+	"github.com/gofiber/fiber/v2"
 )
 
 type Contact struct {
