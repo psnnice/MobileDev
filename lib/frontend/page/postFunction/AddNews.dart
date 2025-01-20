@@ -95,7 +95,10 @@ void showAddNewsDialog(BuildContext context) {
 
                 if (response.statusCode == 201) {
                   Navigator.of(context).pop();
-                  (context as Element).reassemble();
+
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => News()),
+                  );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

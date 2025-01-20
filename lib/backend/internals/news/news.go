@@ -4,6 +4,7 @@ import (
     "database/sql"
     "flutter_project/pkg/utils"
     "github.com/gofiber/fiber/v2"
+    "net/http"
     "time"
 )
 
@@ -100,6 +101,28 @@ func InsertNews(db *sql.DB, news News) error {
     `
     _, err := db.Exec(query, news.ImagePath, news.Title, news.Content, news.URL, news.CreatedAt)
     return err
+}
+
+// ลบข่าวจากฐานข้อมูล
+func DeleteNews(db *sql.DB, id int) error {
+    query := "DELETE FROM news WHERE id = $1"
+    _, err := db.Exec(query, id)
+    return err
+}
+
+// Handler สำหรับลบข่าว
+func DeleteNewsHandler(c *fiber.Ctx) error {
+    id, err := c.ParamsInt("id")
+    if err != nil {
+        return c.Status(http.StatusBadRequest).SendString("Invalid news ID")
+    }
+
+    // Call DeleteNews function to delete the news
+    if err := DeleteNews(utils.DB, id); err != nil {
+        return c.Status(fiber.StatusInternalServerError).SendString("Failed to delete news: " + err.Error())
+    }
+
+    return c.Status(http.StatusOK).SendString("News deleted successfully")
 }
 
 // Helper ฟังก์ชันสำหรับจัดการ NullString

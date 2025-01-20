@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
+import 'package:up_transit/frontend/page/deleteFunction/DeleteNews.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -50,52 +51,80 @@ class _NewsPageState extends State<News> {
       );
     }
   }
-  
+
+  Future<void> deleteNews(BuildContext context, int id) async {
+    try {
+      final response = await http.delete(Uri.parse('http://$ip:8080/news/$id'));
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('News deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _fetchNews(); // Refresh the news list
+      } else {
+        throw Exception('Failed to delete news');
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting news: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-
     String userRole = Provider.of<UserProvider>(context).role;
     return BasePage(
       body: Stack(
-      children: [
-        newsData.isEmpty
-            ? const Center(child: CircularProgressIndicator()) // แสดง loading ขณะโหลด
-            : ListView.builder(
-                padding: const EdgeInsets.all(16.0),
-                itemCount: newsData.length,
-                itemBuilder: (context, index) {
-                  final news = newsData[index];
-                  return _buildContacCard(
-                    imagePath: news['imagePath'],
-                    title: news['title'],
-                    content: news['content'],
-                    url: news['url'],
-                  );
-                },
-              ),
+        children: [
+          newsData.isEmpty
+              ? const Center(child: CircularProgressIndicator()) // แสดง loading ขณะโหลด
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: newsData.length,
+                  itemBuilder: (context, index) {
+                    final news = newsData[index];
+                    return _buildNewsCard(
+                      id: news['id'],
+                      imagePath: news['imagePath'],
+                      title: news['title'],
+                      content: news['content'],
+                      url: news['url'],
+                      userRole: userRole,
+                    );
+                  },
+                ),
           if (userRole == 'admin') // แสดงเฉพาะ admin
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: FloatingActionButton(
-              onPressed: () {
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton(
+                onPressed: () {
                   showAddNewsDialog(context);
                 },
-              child: const Icon(Icons.add),
+                child: const Icon(Icons.add),
+              ),
             ),
-          ),
-      ],
-    ),
+        ],
+      ),
       index: 0,
     );
   }
 
   // ฟังก์ชันสร้างการ์ดข่าว
-  Widget _buildContacCard({
+  Widget _buildNewsCard({
+    required int id,
     required String imagePath,
     required String title,
     required String content,
     required String url,
+    required String userRole,
   }) {
     return GestureDetector(
       onTap: () async {
@@ -169,11 +198,58 @@ class _NewsPageState extends State<News> {
                     'Read more',
                     style: TextStyle(fontSize: 16),
                   ),
-                  Icon(Icons.double_arrow_rounded , color: Colors.black),
+                  Icon(Icons.double_arrow_rounded, color: Colors.black),
                   SizedBox(width: 8),
                 ],
               ),
             ),
+            if (userRole == 'admin')
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color.fromARGB(171, 255, 255, 255)),
+                    color: const Color.fromARGB(226, 255, 255, 255),
+                  ),
+                  child: IconButton(
+                    color: Colors.red,
+                    icon: const Icon(Icons.delete),
+                    onPressed: () async {
+                      bool confirm = await showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: Text('Confirm Deletion'),
+                            content: Text('Are you sure you want to delete this news?'),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false);
+                                },
+                                child: Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true);
+                                },
+                                child: Text('Delete'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                       if (confirm) {
+                          deleteNews(context, id);
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) => News()),
+                          );
+                        }
+                    },
+                  ),
+                ),
+              ),
           ],
         ),
       ),

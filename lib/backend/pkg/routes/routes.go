@@ -17,8 +17,9 @@ func SetupRoutes(app *fiber.App) {
 	app.Get("/DataBus", bus.GetDeviceDataHandler)
 	// ใช้ endpoint เดียวกันสำหรับ GET และ POST
 
-	app.Get("/news", news.GetNewsHandler)
 	app.Post("/news", news.InsertNewsHandler)
+	app.Get("/news", news.GetNewsHandler)
+	app.Delete("/news/:id", news.DeleteNewsHandler)
 
 	app.Post("/contacts", contacts.InsertContactHandler)
 	app.Get("/contacts", contacts.GetContactHandler)
