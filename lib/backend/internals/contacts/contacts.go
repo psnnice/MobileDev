@@ -3,6 +3,8 @@ package contacts
 import (
 	"database/sql"
 	"flutter_project/pkg/utils"
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -75,10 +77,38 @@ func GetAllContacts() ([]Contact, error) {
 	return contactList, nil
 }
 
+func InsertContact(db *sql.DB, contact Contact) error {
+	query := `
+        INSERT INTO contacts (image_path, profile_image, title, email, phone_number, url)
+        VALUES ($1, $2, $3, $4, $5, $6)
+    `
+	_, err := db.Exec(query, contact.ImagePath, contact.ProfileImage, contact.Title, contact.Email, contact.PhoneNumber, contact.URL)
+	return err
+}
+
+func InsertContactHandler(c *fiber.Ctx) error {
+	var contact Contact
+	if err := c.BodyParser(&contact); err != nil {
+		return c.Status(http.StatusBadRequest).SendString("Invalid request payload: " + err.Error())
+	}
+
+	// Validate contact data if necessary
+	if contact.Title == "" || contact.Email == "" {
+		return c.Status(http.StatusBadRequest).SendString("Missing required contact fields")
+	}
+
+	// Call InsertContact function to insert the contact
+	if err := InsertContact(utils.DB, contact); err != nil {
+		return c.Status(http.StatusInternalServerError).SendString("Failed to insert contact: " + err.Error())
+	}
+
+	return c.Status(http.StatusCreated).SendString("Contact inserted successfully")
+}
+
 // Helper ฟังก์ชันสำหรับจัดการ NullString
 func nullableStringToDefault(ns sql.NullString) string {
 	if ns.Valid {
 		return ns.String
 	}
-	return "" // คืนค่าเป็นช่องว่างหาก NULL
+	return ""
 }

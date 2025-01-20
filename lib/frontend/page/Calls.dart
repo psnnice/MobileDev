@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
-
+import 'package:up_transit/frontend/page/postFunction/AddContact.dart';
 import 'Basepage.dart';
 
 var ip = Config.ip; // อย่าลืมเปลี่ยน IP
@@ -37,6 +37,7 @@ class _ContacPageState extends State<Contact> {
           // แปลง null เป็นช่องว่าง
           contactData = data.map((contact) {
             return {
+              "id"            : contact["id"]           ?? "",
               "imagePath"     : contact["imagePath"]    ?? "",
               "profileImage"  : contact["profileImage"] ?? "",
               "title"         : contact["title"]        ?? "",
@@ -84,7 +85,7 @@ class _ContacPageState extends State<Contact> {
               right: 16.0,
               child: FloatingActionButton(
                 onPressed: () {
-                  // เพิ่มการทำงานเมื่อกดปุ่ม
+                  showAddContactDialog(context);
                 },
                 child: Icon(Icons.add),
               ),
