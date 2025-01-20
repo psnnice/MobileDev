@@ -45,38 +45,40 @@ class _RegisterPageState extends State<RegisterPage> {
           _isLoading = false;
         });
 
-        if (response.statusCode == 201) {
+        if (response.statusCode == 409) { // รหัส 409 สำหรับกรณี username ซ้ำ
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Registration Successful'),
+            SnackBar(
+              content: Text(response.body.isNotEmpty
+                  ? response.body
+                  : 'Username already exists'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        } else if (response.statusCode == 201) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.body.isNotEmpty
+                  ? response.body
+                  : 'User registered successfully'),
               backgroundColor: Colors.green,
             ),
           );
-
+          
           // กลับไปหน้า Login
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const LoginPage()),
           );
-        } 
-        
-        if (response.statusCode == 409) { // รหัส 409 สำหรับกรณี username ซ้ำ
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Username already exists'),
-              backgroundColor: Colors.orange,
-            ),
-          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(response.body.isNotEmpty
-                  ? response.body
-                  : 'Registration failed. Please try again.'),
+            const SnackBar(
+              content: Text('Registration failed. Please try again.'),
               backgroundColor: Colors.red,
             ),
           );
         }
+        
+         
       } catch (error) {
         setState(() {
           _isLoading = false;

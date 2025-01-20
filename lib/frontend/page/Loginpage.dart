@@ -60,16 +60,22 @@ class _LoginPageState extends State<LoginPage> {
         });
 
         if (response.statusCode == 200) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => Home()),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Login Successful'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          final data = json.decode(response.body);
+          final role = data['role'];// ดึง role จาก response
+        
+          if(role == 'user' || role == 'admin'){
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Home()),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Login Successful'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

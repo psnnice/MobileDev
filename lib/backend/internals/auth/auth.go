@@ -25,14 +25,14 @@ func RegisterHandler(c *fiber.Ctx) error {
 
 	// ตรวจสอบว่ามี username นี้อยู่แล้วหรือไม่
 	var exists bool
-    err := utils.DB.QueryRow("SELECT EXISTS (SELECT 1 FROM users WHERE username=$1)", user.Username).Scan(&exists)
-    if err != nil {
-        return c.Status(fiber.StatusInternalServerError).SendString("Database error")
-    }
+	err := utils.DB.QueryRow("SELECT EXISTS (SELECT 1 FROM users WHERE username=$1)", user.Username).Scan(&exists)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).SendString("Database error")
+	}
 
-    if exists {
-        return c.Status(409).SendString("Username already exists")
-    }
+	if exists {
+		return c.Status(409).SendString("Username already exists")
+	}
 
 	// แฮชรหัสผ่าน
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
@@ -41,7 +41,7 @@ func RegisterHandler(c *fiber.Ctx) error {
 	}
 
 	// บันทึกข้อมูลลงฐานข้อมูล
-	_, err = utils.DB.Exec("INSERT INTO users (username, password) VALUES ($1, $2)", user.Username, string(hashedPassword))
+	_, err = utils.DB.Exec("INSERT INTO users (username, password, role) VALUES ($1, $2, $3)", user.Username, string(hashedPassword), "user")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to register user")
 	}
@@ -59,13 +59,13 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("Username and password are required")
 	}
 
-	// ดึงรหัสผ่านที่แฮชจากฐานข้อมูล
-	var storedHashedPassword string
-	err := utils.DB.QueryRow("SELECT password FROM users WHERE username=$1", user.Username).Scan(&storedHashedPassword)
+	// ดึงรหัสผ่านที่แฮชและ role จากฐานข้อมูล
+	var storedHashedPassword, role string
+	err := utils.DB.QueryRow("SELECT password, role FROM users WHERE username=$1", user.Username).Scan(&storedHashedPassword, &role)
 	if err == sql.ErrNoRows {
 		return c.Status(fiber.StatusUnauthorized).SendString("Invalid username or password")
 	} else if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Error authenticating user")
+		return c.Status(fiber.StatusInternalServerError).SendString("Database error")
 	}
 
 	// เปรียบเทียบรหัสผ่าน
@@ -74,11 +74,14 @@ func LoginHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnauthorized).SendString("Invalid username or password")
 	}
 
-	// สร้าง JWT Token
-	token, err := utils.GenerateToken(user.Username)
+	// สร้าง JWT Token พร้อม role
+	token, err := utils.GenerateToken(user.Username, role)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to generate token")
 	}
 
-	return c.JSON(fiber.Map{"token": token})
+	return c.JSON(fiber.Map{
+		"token": token,
+		"role":  role,
+	})
 }
