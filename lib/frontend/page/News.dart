@@ -1,12 +1,13 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'Basepage.dart';
 
-const ip = "192.168.1.202";//อย่าลืมเปลี่ยน ip 
+var ip = Config.ip;//อย่าลืมเปลี่ยน ip
 
 class News extends StatefulWidget {
   const News({super.key});

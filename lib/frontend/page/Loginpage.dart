@@ -2,12 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:up_transit/frontend/page/configip/config.dart';
 import 'Home.dart';
 import 'RegisterPage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-const ip = "192.168.1.202";//อย่าลืมเปลี่ยน ip 
+var ip = Config.ip;//อย่าลืมเปลี่ยน ip
 
 void main() => runApp(const MyApp());
 

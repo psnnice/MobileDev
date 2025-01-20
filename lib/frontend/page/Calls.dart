@@ -1,10 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
-import 'package:http/http.dart' as http; // ใช้สำหรับดึงข้อมูลจาก API
 import 'dart:convert'; // ใช้สำหรับแปลง JSON
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http; // ใช้สำหรับดึงข้อมูลจาก API
+import 'package:up_transit/frontend/page/configip/config.dart';
+import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
+
 import 'Basepage.dart';
 
-const ip = "192.168.1.202"; // อย่าลืมเปลี่ยน IP 
+var ip = Config.ip; // อย่าลืมเปลี่ยน IP
 
 class Contact extends StatefulWidget {
   const Contact({super.key});
