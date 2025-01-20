@@ -126,7 +126,9 @@ void showAddContactDialog(BuildContext context) {
                   Navigator.of(context).pop();
 
                   // รีเฟรชหน้า
-                  (context as Element).reassemble();
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => Contact()),
+                  );
                 } else {
                   // แสดงข้อความแสดงข้อผิดพลาด
                   ScaffoldMessenger.of(context).showSnackBar(
