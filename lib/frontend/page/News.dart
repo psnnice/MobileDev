@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับ�
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'Basepage.dart';
+import 'postFunction/AddNews.dart';
 
 var ip = Config.ip;//อย่าลืมเปลี่ยน ip
 
@@ -77,7 +78,9 @@ class _NewsPageState extends State<News> {
             bottom: 16,
             right: 16,
             child: FloatingActionButton(
-              onPressed: _showAddNewsPopup,
+              onPressed: () {
+                  showAddNewsDialog(context);
+                },
               child: const Icon(Icons.add),
             ),
           ),
@@ -174,81 +177,6 @@ class _NewsPageState extends State<News> {
           ],
         ),
       ),
-    );
-  }
-
-  // ฟังก์ชันสร้าง popup สำหรับเพิ่มข่าว
-  void _showAddNewsPopup() {
-    final TextEditingController titleController     = TextEditingController();
-    final TextEditingController contentController   = TextEditingController();
-    final TextEditingController urlController       = TextEditingController();
-    final TextEditingController imagePathController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add News'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(labelText: 'Title'),
-                ),
-                TextField(
-                  controller: contentController,
-                  decoration: const InputDecoration(labelText: 'Content'),
-                ),
-                TextField(
-                  controller: urlController,
-                  decoration: const InputDecoration(labelText: 'URL'),
-                ),
-                TextField(
-                  controller: imagePathController,
-                  decoration: const InputDecoration(labelText: 'Image Path'),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                // เพิ่มข้อมูลลงฐานข้อมูล
-                final response = await http.post(
-                  Uri.parse('http://$ip:8080/news'),
-                  headers: {"Content-Type": "application/json"},
-                  body: jsonEncode({
-                    'title': titleController.text,
-                    'content': contentController.text,
-                    'url': urlController.text,
-                    'imagePath': imagePathController.text,
-                  }),
-                );
-
-                if (response.statusCode == 201) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('News added successfully')),
-                  );
-                  _fetchNews(); // โหลดข่าวใหม่
-                  Navigator.pop(context);
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to add news: ${response.body}'),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
     );
   }
 }

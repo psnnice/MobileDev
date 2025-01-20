@@ -1,8 +1,10 @@
 package news
 
 import (
-    "github.com/gofiber/fiber/v2"
+    "database/sql"
     "flutter_project/pkg/utils"
+    "github.com/gofiber/fiber/v2"
+    "time"
 )
 
 type News struct {
@@ -34,11 +36,29 @@ func GetAllNews() ([]News, error) {
 
     var newsList []News
     for rows.Next() {
-        var news News
-        err := rows.Scan(&news.ID, &news.ImagePath, &news.Title, &news.Content, &news.URL, &news.CreatedAt)
+        var (
+            id        int
+            imagePath sql.NullString
+            title     sql.NullString
+            content   sql.NullString
+            url       sql.NullString
+            createdAt sql.NullString
+        )
+
+        err := rows.Scan(&id, &imagePath, &title, &content, &url, &createdAt)
         if err != nil {
             return nil, err
         }
+
+        news := News{
+            ID:        id,
+            ImagePath: nullableStringToDefault(imagePath),
+            Title:     nullableStringToDefault(title),
+            Content:   nullableStringToDefault(content),
+            URL:       nullableStringToDefault(url),
+            CreatedAt: nullableStringToDefault(createdAt),
+        }
+
         newsList = append(newsList, news)
     }
 
@@ -48,4 +68,44 @@ func GetAllNews() ([]News, error) {
     }
 
     return newsList, nil
+}
+
+// Handler สำหรับเพิ่มข่าวใหม่
+func InsertNewsHandler(c *fiber.Ctx) error {
+    var news News
+    if err := c.BodyParser(&news); err != nil {
+        return c.Status(fiber.StatusBadRequest).SendString("Invalid request payload: " + err.Error())
+    }
+
+    // Validate news data if necessary
+    if news.Title == "" || news.Content == "" {
+        return c.Status(fiber.StatusBadRequest).SendString("Missing required news fields")
+    }
+
+    news.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
+
+    // Call InsertNews function to insert the news
+    if err := InsertNews(utils.DB, news); err != nil {
+        return c.Status(fiber.StatusInternalServerError).SendString("Failed to insert news: " + err.Error())
+    }
+
+    return c.Status(fiber.StatusCreated).SendString("News inserted successfully")
+}
+
+// เพิ่มข่าวใหม่ลงในฐานข้อมูล
+func InsertNews(db *sql.DB, news News) error {
+    query := `
+        INSERT INTO news (image_path, title, content, url, created_at)
+        VALUES ($1, $2, $3, $4, $5)
+    `
+    _, err := db.Exec(query, news.ImagePath, news.Title, news.Content, news.URL, news.CreatedAt)
+    return err
+}
+
+// Helper ฟังก์ชันสำหรับจัดการ NullString
+func nullableStringToDefault(ns sql.NullString) string {
+    if ns.Valid {
+        return ns.String
+    }
+    return ""
 }
