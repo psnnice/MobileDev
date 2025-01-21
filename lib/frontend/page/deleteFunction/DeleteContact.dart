@@ -11,13 +11,13 @@ Future<void> deleteContact(BuildContext context, int id) async {
     if (response.statusCode == 200) {
       // ลบสำเร็จ
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Card deleted successfully')),
+        const SnackBar(content: Text('Contact deleted successfully')),
       );
       // อัปเดต UI หรือรีเฟรชรายการการ์ด (สามารถเพิ่ม callback เพื่อรีเฟรชได้)
     } else {
       // ลบไม่สำเร็จ
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete card: ${response.body}')),
+        SnackBar(content: Text('Failed to delete Contact: ${response.body}')),
       );
     }
   } catch (error) {

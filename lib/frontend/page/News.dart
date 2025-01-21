@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'Basepage.dart';
 import 'postFunction/AddNews.dart';
 import 'updateFunction/updateNews.dart';
+import 'deleteFunction/DeleteNews.dart';
 
 var ip = Config.ip;//อย่าลืมเปลี่ยน ip
 
@@ -44,60 +45,6 @@ class _NewsPageState extends State<News> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error fetching news: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> deleteNews(BuildContext context, int id) async {
-    try {
-      final response = await http.delete(Uri.parse('http://$ip:8080/news/$id'));
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('News deleted successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _fetchNews(); // Refresh the news list
-      } else {
-        throw Exception('Failed to delete news');
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error deleting news: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> updateNews(BuildContext context, int id, Map<String, String> updatedNews) async {
-    try {
-      final response = await http.put(
-        Uri.parse('http://$ip:8080/news/$id'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode(updatedNews),
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('News updated successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        _fetchNews(); // Refresh the news list
-      } else {
-        throw Exception('Failed to update news');
-      }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating news: $error'),
           backgroundColor: Colors.red,
         ),
       );
