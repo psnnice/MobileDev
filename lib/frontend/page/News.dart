@@ -1,15 +1,13 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
-import 'package:up_transit/frontend/page/deleteFunction/DeleteNews.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'Basepage.dart';
 import 'postFunction/AddNews.dart';
+import 'updateFunction/updateNews.dart';
 
 var ip = Config.ip;//อย่าลืมเปลี่ยน ip
 
@@ -71,6 +69,35 @@ class _NewsPageState extends State<News> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error deleting news: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> updateNews(BuildContext context, int id, Map<String, String> updatedNews) async {
+    try {
+      final response = await http.put(
+        Uri.parse('http://$ip:8080/news/$id'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(updatedNews),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('News updated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _fetchNews(); // Refresh the news list
+      } else {
+        throw Exception('Failed to update news');
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating news: $error'),
           backgroundColor: Colors.red,
         ),
       );
@@ -207,47 +234,72 @@ class _NewsPageState extends State<News> {
               Positioned(
                 top: 8,
                 right: 8,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color.fromARGB(171, 255, 255, 255)),
-                    color: const Color.fromARGB(226, 255, 255, 255),
-                  ),
-                  child: IconButton(
-                    color: Colors.red,
-                    icon: const Icon(Icons.delete),
-                    onPressed: () async {
-                      bool confirm = await showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            title: Text('Confirm Deletion'),
-                            content: Text('Are you sure you want to delete this news?'),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop(false);
-                                },
-                                child: Text('Cancel'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop(true);
-                                },
-                                child: Text('Delete'),
-                              ),
-                            ],
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color.fromARGB(171, 255, 255, 255)),
+                        color: const Color.fromARGB(226, 255, 255, 255),
+                      ),
+                      child: IconButton(
+                        color: Colors.red,
+                        icon: const Icon(Icons.delete),
+                        onPressed: () async {
+                          bool confirm = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Confirm Deletion'),
+                                content: Text('Are you sure you want to delete this news?'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                    child: Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    child: Text('Delete'),
+                                  ),
+                                ],
+                              );
+                            },
                           );
+                          if (confirm) {
+                            deleteNews(context, id);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) => News()),
+                            );
+                          }
                         },
-                      );
-                       if (confirm) {
-                          deleteNews(context, id);
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (context) => News()),
-                          );
-                        }
-                    },
-                  ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color.fromARGB(171, 255, 255, 255)),
+                        color: const Color.fromARGB(226, 255, 255, 255),
+                      ),
+                      child: IconButton(
+                        color: Colors.blue,
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          showUpdateNewsDialog(context, id, {
+                            "imagePath": imagePath,
+                            "title": title,
+                            "content": content,
+                            "url": url,
+                          });
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],

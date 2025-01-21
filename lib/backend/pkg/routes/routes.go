@@ -19,7 +19,10 @@ func SetupRoutes(app *fiber.App) {
 
 	app.Post("/news", news.InsertNewsHandler)
 	app.Get("/news", news.GetNewsHandler)
+	app.Put("/news/:id", news.UpdateNewsHandler)
 	app.Delete("/news/:id", news.DeleteNewsHandler)
+
+	
 
 	app.Post("/contacts", contacts.InsertContactHandler)
 	app.Get("/contacts", contacts.GetContactHandler)

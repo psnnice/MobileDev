@@ -103,6 +103,42 @@ func InsertNews(db *sql.DB, news News) error {
     return err
 }
 
+// Handler สำหรับอัปเดตข่าว
+func UpdateNewsHandler(c *fiber.Ctx) error {
+    id, err := c.ParamsInt("id")
+    if err != nil {
+        return c.Status(http.StatusBadRequest).SendString("Invalid news ID")
+    }
+
+    var news News
+    if err := c.BodyParser(&news); err != nil {
+        return c.Status(fiber.StatusBadRequest).SendString("Invalid request payload: " + err.Error())
+    }
+
+    // Validate news data if necessary
+    if news.Title == "" || news.Content == "" {
+        return c.Status(fiber.StatusBadRequest).SendString("Missing required news fields")
+    }
+
+    // Call UpdateNews function to update the news
+    if err := UpdateNews(utils.DB, id, news); err != nil {
+        return c.Status(fiber.StatusInternalServerError).SendString("Failed to update news: " + err.Error())
+    }
+
+    return c.Status(http.StatusOK).SendString("News updated successfully")
+}
+
+// อัปเดตข่าวในฐานข้อมูล
+func UpdateNews(db *sql.DB, id int, news News) error {
+    query := `
+        UPDATE news
+        SET image_path = $1, title = $2, content = $3, url = $4
+        WHERE id = $5
+    `
+    _, err := db.Exec(query, news.ImagePath, news.Title, news.Content, news.URL, id)
+    return err
+}
+
 // ลบข่าวจากฐานข้อมูล
 func DeleteNews(db *sql.DB, id int) error {
     query := "DELETE FROM news WHERE id = $1"
