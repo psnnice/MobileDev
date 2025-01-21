@@ -26,6 +26,7 @@ func SetupRoutes(app *fiber.App) {
 
 	app.Post("/contacts", contacts.InsertContactHandler)
 	app.Get("/contacts", contacts.GetContactHandler)
+	app.Put("/contacts/:id", contacts.UpdateContactHandler)
 	app.Delete("/contacts/:id", contacts.DeleteContactHandler)
 
 }

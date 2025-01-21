@@ -8,6 +8,7 @@ import 'package:up_transit/frontend/page/deleteFunction/DeleteContact.dart';
 import 'package:up_transit/frontend/page/postFunction/AddContact.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
+import 'updateFunction/updateContact.dart';
 
 import 'Basepage.dart';
 
@@ -210,52 +211,78 @@ class _ContacPageState extends State<Contact> {
               
             ),
             if (userRole == 'admin')
-  Positioned(
-    top: 8,
-    right: 8,
-    child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color.fromARGB(171, 255, 255, 255)),
-        color: const Color.fromARGB(226, 255, 255, 255),
-      ),
-      child: IconButton(
-        color: Colors.red,
-        icon: const Icon(Icons.delete),
-        onPressed: () async {
-          bool confirm = await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Confirm Deletion'),
-                content: Text('Are you sure you want to delete this contact?'),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(false);
-                    },
-                    child: Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(true);
-                    },
-                    child: Text('Delete'),
-                  ),
-                ],
-              );
-            },
-          );
-          if (confirm) {
-            deleteContact(context, id);
-            Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => Contact()),
-                  );
-          }
-        },
-      ),
-    ),
-  ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Column(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color.fromARGB(171, 255, 255, 255)),
+                        color: const Color.fromARGB(226, 255, 255, 255),
+                      ),
+                      child: IconButton(
+                        color: Colors.red,
+                        icon: const Icon(Icons.delete),
+                        onPressed: () async {
+                          bool confirm = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Confirm Deletion'),
+                                content: Text('Are you sure you want to delete this contact?'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                    child: Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    child: Text('Delete'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                          if (confirm) {
+                            deleteContact(context, id);
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (context) => Contact()),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color.fromARGB(171, 255, 255, 255)),
+                        color: const Color.fromARGB(226, 255, 255, 255),
+                      ),
+                      child: IconButton(
+                        color: Colors.blue,
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          showUpdateContactDialog(context, id, {
+                            "imagePath": imagePath,
+                            "profileImage": profileImage,
+                            "title": title,
+                            "email": email,
+                            "phoneNumber": phoneNumber,
+                            "url": url,
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             const Positioned(
               bottom: 8,
               right: 8,

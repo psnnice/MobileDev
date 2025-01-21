@@ -105,6 +105,42 @@ func InsertContactHandler(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).SendString("Contact inserted successfully")
 }
 
+// Handler สำหรับอัปเดต Contact
+func UpdateContactHandler(c *fiber.Ctx) error {
+    id, err := c.ParamsInt("id")
+    if err != nil {
+        return c.Status(http.StatusBadRequest).SendString("Invalid contact ID")
+    }
+
+    var contact Contact
+    if err := c.BodyParser(&contact); err != nil {
+        return c.Status(http.StatusBadRequest).SendString("Invalid request payload: " + err.Error())
+    }
+
+    // Validate contact data if necessary
+    if contact.Title == "" || contact.Email == "" {
+        return c.Status(http.StatusBadRequest).SendString("Missing required contact fields")
+    }
+
+    // Call UpdateContact function to update the contact
+    if err := UpdateContact(utils.DB, id, contact); err != nil {
+        return c.Status(fiber.StatusInternalServerError).SendString("Failed to update contact: " + err.Error())
+    }
+
+    return c.Status(http.StatusOK).SendString("Contact updated successfully")
+}
+
+// อัปเดต Contact ในฐานข้อมูล
+func UpdateContact(db *sql.DB, id int, contact Contact) error {
+    query := `
+        UPDATE contacts
+        SET image_path = $1, profile_image = $2, title = $3, email = $4, phone_number = $5, url = $6
+        WHERE id = $7
+    `
+    _, err := db.Exec(query, contact.ImagePath, contact.ProfileImage, contact.Title, contact.Email, contact.PhoneNumber, contact.URL, id)
+    return err
+}
+
 func DeleteContact(db *sql.DB, id int) error {
 	query := "DELETE FROM contacts WHERE id = $1"
 	_, err := db.Exec(query, id)
