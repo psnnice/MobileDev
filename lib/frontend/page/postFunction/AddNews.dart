@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/News.dart';
 import 'package:up_transit/frontend/page/token.dart';
-List<Map<String, String>> newsData = [];
+import 'package:up_transit/frontend/page/providers/user_provider.dart';
+
+List<Map<String, dynamic>> newsData = [];
 
 void showAddNewsDialog(BuildContext context) {
   final _formKey = GlobalKey<FormState>();
@@ -23,7 +26,6 @@ void showAddNewsDialog(BuildContext context) {
           child: SingleChildScrollView(
             child: Column(
               children: [
-
                 TextFormField(
                   controller: _imagePathController,
                   decoration: InputDecoration(labelText: 'Image Path'),
@@ -78,34 +80,38 @@ void showAddNewsDialog(BuildContext context) {
           ElevatedButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
-                final newNews = {
-                  "imagePath" : _imagePathController.text,
-                  "title"     : _titleController.text,
-                  "content"   : _contentController.text,
-                  "url"       : _urlController.text,
-                };
-
-                newsData.add(newNews);
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                final int? userId = userProvider.id; // ดึง user_id
                 final secureStorage = SecureStorage();
                 final token = await secureStorage.getToken();
+
+                final newNews = {
+                  "image_path": _imagePathController.text,
+                  "title": _titleController.text,
+                  "content": _contentController.text,
+                  "url": _urlController.text,
+                  "created_by": userId, // เพิ่ม created_by ตามโครงสร้างฐานข้อมูล
+                };
+
                 final response = await http.post(
                   Uri.parse('http://$ip:8080/news'),
-                  headers: {"Content-Type": "application/json",
-                  "Authorization": "Bearer $token",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer $token",
                   },
                   body: jsonEncode(newNews),
                 );
 
                 if (response.statusCode == 201) {
-                  Navigator.of(context).pop();
-
+                  newsData.add(newNews);
+                  Navigator.of(context).pop(); // ปิด dialog
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (context) => News()),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to add news'),
+                      content: Text('Failed to add news: ${response.body}'),
                       backgroundColor: Colors.red,
                     ),
                   );
