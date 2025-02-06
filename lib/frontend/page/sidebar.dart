@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
+import 'package:up_transit/frontend/page/providers/user_provider.dart';
   final _storage = FlutterSecureStorage();
   void _logout(BuildContext context) async {
     // Handle logout logic here
@@ -23,11 +25,13 @@ class SidebarButton extends StatelessWidget {
 class EndDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final username = userProvider.username; // Assuming username is a property in UserProvider
+
     return Drawer(
-      width: MediaQuery.of(context).size.width / 1.5, 
-      child: Column(
-        children: [
-          // ✅ Header สวยๆ
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -36,7 +40,8 @@ class EndDrawer extends StatelessWidget {
                 end: Alignment.bottomRight,
               ),
             ),
-            accountName: Text("John Doe",
+            accountName: Text(
+              username,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             accountEmail: Text("johndoe@example.com"),
             currentAccountPicture: CircleAvatar(
@@ -46,10 +51,6 @@ class EndDrawer extends StatelessWidget {
           ),
 
           // ✅ รายการเมนู
-          _buildDrawerItem(Icons.home, "Home", context),
-          _buildDrawerItem(Icons.settings, "Settings", context),
-          _buildDrawerItem(Icons.info, "About", context),
-
           Spacer(), // ดัน Logout ไปด้านล่าง
 
           // ✅ ปุ่ม Logout

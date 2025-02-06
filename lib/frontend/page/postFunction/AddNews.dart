@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/News.dart';
-import 'package:up_transit/frontend/page/token.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
+import 'package:up_transit/frontend/page/token.dart';
 
 List<Map<String, dynamic>> newsData = [];
 
@@ -177,30 +177,29 @@ void showAddNewsDialog(BuildContext context) {
           ElevatedButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
-                final userProvider = Provider.of<UserProvider>(context, listen: false);
-                final int? userId = userProvider.id; // ดึง user_id
-                final secureStorage = SecureStorage();
-                final token = await secureStorage.getToken();
-
-                final newNews = {
-                  "image_path": _imageFile != null ? base64Encode(_imageFile!.readAsBytesSync()) : '',
+                int? createBy = Provider.of<UserProvider>(context, listen: false).id;
+                final news = {
+                  "imagePath": _imageFile != null ? base64Encode(_imageFile!.readAsBytesSync()) : '',
                   "title": _titleController.text,
                   "content": _contentController.text,
                   "url": _urlController.text,
-                  "created_by": userId, // เพิ่ม created_by ตามโครงสร้างฐานข้อมูล
+                  "created_by": createBy, // เพิ่ม created_by ตามโครงสร้างฐานข้อมูล
                 };
-
+                print(createBy);
+                newsData.add(news);
+                final secureStorage = SecureStorage();
+                final token = await secureStorage.getToken();
                 final response = await http.post(
                   Uri.parse('http://$ip:8080/news'),
                   headers: {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer $token",
                   },
-                  body: jsonEncode(newNews),
+                  body: jsonEncode(news),
                 );
 
                 if (response.statusCode == 201) {
-                  newsData.add(newNews);
+                  
                   Navigator.of(context).pop(); // ปิด dialog
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (context) => News()),

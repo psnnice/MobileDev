@@ -21,12 +21,21 @@ type News struct {
 
 // Handler สำหรับดึงข่าวทั้งหมด
 func GetNewsHandler(c *fiber.Ctx) error {
-	newsList, err := GetAllNews() // เรียกใช้ฟังก์ชัน GetAllNews
+	newsList, err := GetAllNews() // ✅ ดึงข้อมูลข่าวทั้งหมด
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to fetch news")
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"error":   "Failed to fetch news",
+			"details": err.Error(),
+		}) // ✅ ส่งรายละเอียด error ไปที่ Client
 	}
 
-	return c.JSON(newsList) // ส่งผลลัพธ์ในรูปแบบ JSON
+	// ✅ ป้องกัน null โดยตั้งค่าเป็น []
+	if newsList == nil {
+		newsList = []News{}
+	}
+
+	return c.JSON(newsList) // ✅ ส่งข้อมูลกลับในรูปแบบ JSON
 }
 
 // ดึงข่าวทั้งหมดจากฐานข้อมูล
@@ -38,7 +47,14 @@ func GetAllNews() ([]News, error) {
 	defer rows.Close()
 
 	var newsList []News
-	for rows.Next() {
+
+	// ตรวจสอบว่ามีข่าวหรือไม่ ถ้าไม่มีให้ return []
+	if !rows.Next() {
+		return []News{}, nil // ✅ ส่ง [] แทน null
+	}
+
+	// ถ้ามีข้อมูลให้เริ่มอ่าน
+	for {
 		var (
 			id        int
 			imagePath sql.NullString
@@ -65,11 +81,11 @@ func GetAllNews() ([]News, error) {
 		}
 
 		newsList = append(newsList, news)
-	}
 
-	// ตรวจสอบ error ระหว่างการอ่านข้อมูล
-	if err = rows.Err(); err != nil {
-		return nil, err
+		// ถ้าอ่าน row ล่าสุดแล้วให้ออกจาก loop
+		if !rows.Next() {
+			break
+		}
 	}
 
 	return newsList, nil
@@ -82,14 +98,16 @@ func InsertNewsHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).SendString("Invalid request payload: " + err.Error())
 	}
 
-	// Validate news data if necessary
-	if news.Title == "" || news.Content == "" {
-		return c.Status(fiber.StatusBadRequest).SendString("Missing required news fields")
+	// ✅ ตรวจสอบว่าผู้ใช้มีอยู่จริง
+	if news.CreatedBy != 0 {
+		exists, err := checkUserExists(news.CreatedBy)
+		if err != nil || !exists {
+			return c.Status(fiber.StatusBadRequest).SendString("Invalid created_by: User does not exist")
+		}
 	}
 
 	news.CreatedAt = time.Now().Format("2006-01-02 15:04:05")
 
-	// Call InsertNews function to insert the news
 	if err := InsertNews(utils.DB, news); err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Failed to insert news: " + err.Error())
 	}
@@ -97,12 +115,19 @@ func InsertNewsHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).SendString("News inserted successfully")
 }
 
+// ✅ ฟังก์ชันตรวจสอบว่าผู้ใช้มีอยู่จริงหรือไม่
+func checkUserExists(userID int) (bool, error) {
+	var exists bool
+	err := utils.DB.QueryRow("SELECT EXISTS (SELECT 1 FROM users WHERE id = $1)", userID).Scan(&exists)
+	return exists, err
+}
+
 // เพิ่มข่าวใหม่ลงในฐานข้อมูล
 func InsertNews(db *sql.DB, news News) error {
 	query := `
-        INSERT INTO news (image_path, title, content, url, created_by, created_at)
-        VALUES ($1, $2, $3, $4, $5, $6)
-    `
+    INSERT INTO news (image_path, title, content, url, created_by, created_at)
+    VALUES ($1, $2, $3, $4, NULLIF($5, 0), $6)
+`
 	_, err := db.Exec(query, news.ImagePath, news.Title, news.Content, news.URL, news.CreatedBy, news.CreatedAt)
 	return err
 }

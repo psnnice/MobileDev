@@ -34,7 +34,7 @@ class BasePageState extends State<BasePage> {
 
   void _logout() async {
     // Handle logout logic here
-    await _storage.delete(key: 'token');
+      await _storage.delete(key: 'token');
     Navigator.pushReplacementNamed(context, '/login');
   }
 

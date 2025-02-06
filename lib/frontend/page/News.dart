@@ -1,15 +1,17 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:typed_data';
+
 import 'Basepage.dart';
+import 'deleteFunction/DeleteNews.dart';
 import 'postFunction/AddNews.dart';
 import 'updateFunction/updateNews.dart';
-import 'deleteFunction/DeleteNews.dart';
 
 var ip = Config.ip; // อย่าลืมเปลี่ยน ip
 
@@ -31,13 +33,17 @@ class _NewsPageState extends State<News> {
 
   // ฟังก์ชันสำหรับดึงข้อมูลจาก API
   Future<void> _fetchNews() async {
-    try {
-      final response = await http.get(Uri.parse('http://$ip:8080/news'));
+  try {
+    final response = await http.get(Uri.parse('http://$ip:8080/news'));
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+    print("Response Body: ${response.body}"); // ✅ เช็กค่าที่ API ส่งมา
+
+    if (response.statusCode == 200) {
+      final decodedData = json.decode(utf8.decode(response.bodyBytes));
+
+      if (decodedData is List) { // ✅ ตรวจสอบว่าข้อมูลเป็น List หรือไม่
         setState(() {
-          newsData = data.map((news) {
+          newsData = decodedData.map((news) {
             return {
               "id": news["id"] ?? '',
               "imagePath": news["imagePath"] ?? '',
@@ -45,20 +51,25 @@ class _NewsPageState extends State<News> {
               "content": news["content"] ?? '',
               "url": news["url"] ?? '',
             };
-          }).toList(); // เก็บข้อมูลไว้ใน state
+          }).toList();
         });
       } else {
-        throw Exception('Failed to load news');
+        throw Exception("Invalid data format: Expected List but got ${decodedData.runtimeType}");
       }
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error fetching news: $error'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    } else {
+      throw Exception('Failed to load news: ${response.statusCode}');
     }
+  } catch (error) {
+    print("Error fetching news: $error"); // ✅ Debug error
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error fetching news: $error'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
