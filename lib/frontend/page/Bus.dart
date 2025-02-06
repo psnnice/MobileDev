@@ -5,15 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
+
 import 'package:up_transit/frontend/page/Basepage.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
-import 'package:up_transit/frontend/page/mockDataDevices/mockData.dart' as mockData; // นำเข้าไฟล์ mockData.dart
+
+import 'package:up_transit/frontend/page/mockDataDevices/mockData.dart';
+ // นำเข้าไฟล์ mockData.dart
 
 var ip = Config.ip;
 
 class Bus extends StatefulWidget {
   @override
   _BusPageState createState() => _BusPageState();
+  
 }
 
 class _BusPageState extends State<Bus> {
@@ -32,7 +36,7 @@ class _BusPageState extends State<Bus> {
     _loadRoutes();
     _fetchData();
     _startFetchingData();
-    mockData.main();
+    processAndInsertData(context);
   }
 
   @override
@@ -120,11 +124,16 @@ Future<void> _fetchData() async {
     });
   }
 
-  Future<List<LatLng>> _loadRoute(String path) async {
-    final data = await rootBundle.loadString(path);
-    final jsonResult = json.decode(data) as List;
-    return jsonResult.map((point) => LatLng(point['lat'], point['lng'])).toList();
+Future<List<LatLng>> _loadRoute(String path) async {
+  final data = await rootBundle.loadString(path);
+  final jsonResult = json.decode(data);
+  
+  if (jsonResult == null || jsonResult is! List) {
+    throw Exception('Invalid JSON format or empty data');
   }
+
+  return jsonResult.map((point) => LatLng(point['lat'], point['lng'])).toList();
+}
 
     Future<Set<Marker>> _loadBusStops() async {
     final busStopIcon = await BitmapDescriptor.fromAssetImage(

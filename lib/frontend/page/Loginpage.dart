@@ -1,15 +1,17 @@
 // ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously, prefer_const_constructors
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:up_transit/frontend/page/token.dart';
+
 import 'Home.dart';
 import 'RegisterPage.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 
 var ip = Config.ip;//อย่าลืมเปลี่ยน ip
@@ -68,7 +70,8 @@ class _LoginPageState extends State<LoginPage> {
           final data = json.decode(response.body);
           final role = data['role']; // ดึง role จาก response
           final token = data['token']; // ดึง token จาก response
-
+          final username = data['username']; // ดึง username จาก response
+          final id = data['id']; // ดึง id จาก response
           // บันทึก token
           await secureStorage.saveToken(token);
 
@@ -76,7 +79,8 @@ class _LoginPageState extends State<LoginPage> {
           print('Token exists: $hasToken'); // พิมพ์ผลลัพธ์ลงใน console
 
           Provider.of<UserProvider>(context, listen: false).setRole(role);
-
+          Provider.of<UserProvider>(context, listen: false).setUser(username, id);
+          
           if (role == 'user' || role == 'admin') {
             Navigator.pushReplacement(
               context,

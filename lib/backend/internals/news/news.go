@@ -3,9 +3,10 @@ package news
 import (
 	"database/sql"
 	"flutter_project/pkg/utils"
-	"github.com/gofiber/fiber/v2"
 	"net/http"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 type News struct {
@@ -14,6 +15,7 @@ type News struct {
 	Title     string `json:"title"`
 	Content   string `json:"content"`
 	URL       string `json:"url"`
+	CreatedBy int    `json:"createdBy"` // เพิ่ม createdBy
 	CreatedAt string `json:"createdAt"`
 }
 
@@ -29,7 +31,7 @@ func GetNewsHandler(c *fiber.Ctx) error {
 
 // ดึงข่าวทั้งหมดจากฐานข้อมูล
 func GetAllNews() ([]News, error) {
-	rows, err := utils.DB.Query("SELECT id, image_path, title, content, url, created_at FROM news")
+	rows, err := utils.DB.Query("SELECT id, image_path, title, content, url, created_by, created_at FROM news")
 	if err != nil {
 		return nil, err
 	}
@@ -43,10 +45,11 @@ func GetAllNews() ([]News, error) {
 			title     sql.NullString
 			content   sql.NullString
 			url       sql.NullString
+			createdBy sql.NullInt32
 			createdAt sql.NullString
 		)
 
-		err := rows.Scan(&id, &imagePath, &title, &content, &url, &createdAt)
+		err := rows.Scan(&id, &imagePath, &title, &content, &url, &createdBy, &createdAt)
 		if err != nil {
 			return nil, err
 		}
@@ -57,6 +60,7 @@ func GetAllNews() ([]News, error) {
 			Title:     nullableStringToDefault(title),
 			Content:   nullableStringToDefault(content),
 			URL:       nullableStringToDefault(url),
+			CreatedBy: nullableIntToDefault(createdBy),
 			CreatedAt: nullableStringToDefault(createdAt),
 		}
 
@@ -96,10 +100,10 @@ func InsertNewsHandler(c *fiber.Ctx) error {
 // เพิ่มข่าวใหม่ลงในฐานข้อมูล
 func InsertNews(db *sql.DB, news News) error {
 	query := `
-        INSERT INTO news (image_path, title, content, url)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO news (image_path, title, content, url, created_by, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6)
     `
-	_, err := db.Exec(query, news.ImagePath, news.Title, news.Content, news.URL)
+	_, err := db.Exec(query, news.ImagePath, news.Title, news.Content, news.URL, news.CreatedBy, news.CreatedAt)
 	return err
 }
 
@@ -132,10 +136,10 @@ func UpdateNewsHandler(c *fiber.Ctx) error {
 func UpdateNews(db *sql.DB, id int, news News) error {
 	query := `
         UPDATE news
-        SET image_path = $1, title = $2, content = $3, url = $4
-        WHERE id = $5
+        SET image_path = $1, title = $2, content = $3, url = $4, created_by = $5, created_at = $6
+        WHERE id = $7
     `
-	_, err := db.Exec(query, news.ImagePath, news.Title, news.Content, news.URL, id)
+	_, err := db.Exec(query, news.ImagePath, news.Title, news.Content, news.URL, news.CreatedBy, news.CreatedAt, id)
 	return err
 }
 
@@ -167,4 +171,12 @@ func nullableStringToDefault(ns sql.NullString) string {
 		return ns.String
 	}
 	return ""
+}
+
+// Helper ฟังก์ชันสำหรับจัดการ NullInt32
+func nullableIntToDefault(ni sql.NullInt32) int {
+	if ni.Valid {
+		return int(ni.Int32)
+	}
+	return 0
 }

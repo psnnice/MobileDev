@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,69 +8,166 @@ import 'package:up_transit/frontend/page/News.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:up_transit/frontend/page/token.dart';
+import 'package:image_picker/image_picker.dart';
 
 var ip = Config.ip;
 
 void showUpdateNewsDialog(BuildContext context, int id, Map<String, String> currentNews) {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _imagePathController = TextEditingController(text: currentNews["image_path"]);
+
   final TextEditingController _titleController = TextEditingController(text: currentNews["title"]);
   final TextEditingController _contentController = TextEditingController(text: currentNews["content"]);
   final TextEditingController _urlController = TextEditingController(text: currentNews["url"]);
+  File? _imageFile;
+
+  Future<void> _pickImage(StateSetter setState) async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
 
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
         title: Text('Update News'),
-        content: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _imagePathController,
-                  decoration: InputDecoration(labelText: 'Image Path'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter image path';
-                    }
-                    return null;
-                  },
+        content: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.add_photo_alternate_rounded),
+                          onPressed: () => _pickImage(setState),
+                        ),
+                        SizedBox(width: 8),
+                        Text(_imageFile != null ? 'Image Selected' : 'No Image Selected'),
+                        SizedBox(width: 10),
+                        if (_imageFile != null)
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                child: Image.file(
+                                  _imageFile!,
+                                  width: 40,
+                                  height: 40,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 15,
+                                left: 15,
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.cancel_outlined,
+                                    color: Colors.red,
+                                    size: 15,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _imageFile = null;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          border: Border.all(color: Colors.white),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: TextFormField(
+                            controller: _titleController,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Title',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter title';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          border: Border.all(color: Colors.white),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: TextFormField(
+                            controller: _contentController,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'Content',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter content';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          border: Border.all(color: Colors.white),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 20.0),
+                          child: TextFormField(
+                            controller: _urlController,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              hintText: 'URL',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter URL';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                TextFormField(
-                  controller: _titleController,
-                  decoration: InputDecoration(labelText: 'Title'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter title';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _contentController,
-                  decoration: InputDecoration(labelText: 'Content'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter content';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _urlController,
-                  decoration: InputDecoration(labelText: 'URL'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter URL';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
         actions: [
           TextButton(
@@ -80,7 +178,18 @@ void showUpdateNewsDialog(BuildContext context, int id, Map<String, String> curr
           ),
           ElevatedButton(
             onPressed: () async {
-              if (_formKey.currentState!.validate()) {
+              if (_formKey.currentState!.validate()) {                
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                final int? createdBy = userProvider.id;
+                final updatedNews = {
+                  
+                  "image_path": _imageFile != null ? base64Encode(_imageFile!.readAsBytesSync()) : currentNews["imagePath"] ?? '',
+                  "title": _titleController.text,
+                  "content": _contentController.text,
+                  "url": _urlController.text,
+                  if (createdBy != null) "created_by": createdBy, // ส่ง created_by ถ้ามีค่า
+                };
+
                 final secureStorage = SecureStorage();
                 final token = await secureStorage.getToken();
 
@@ -91,23 +200,10 @@ void showUpdateNewsDialog(BuildContext context, int id, Map<String, String> curr
                   return;
                 }
 
-                // ✅ ดึง created_by จาก Provider
-                final userProvider = Provider.of<UserProvider>(context, listen: false);
-                final int? createdBy = userProvider.id;
-
-                final updatedNews = {
-                  "image_path": _imagePathController.text,
-                  "title": _titleController.text,
-                  "content": _contentController.text,
-                  "url": _urlController.text,
-                  if (createdBy != null) "created_by": createdBy, // ส่ง created_by ถ้ามีค่า
-                };
-
                 final response = await http.put(
                   Uri.parse('http://$ip:8080/news/$id'),
-                  headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer $token",
+                  headers: {"Content-Type": "application/json",
+                  'Authorization': 'Bearer $token',
                   },
                   body: jsonEncode(updatedNews),
                 );
@@ -117,6 +213,8 @@ void showUpdateNewsDialog(BuildContext context, int id, Map<String, String> curr
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (context) => News()),
                   );
+                } else if (response.statusCode == 400) {
+                  print(token);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Failed to update news'), backgroundColor: Colors.red),

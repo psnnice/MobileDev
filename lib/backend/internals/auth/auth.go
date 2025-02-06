@@ -61,7 +61,8 @@ func LoginHandler(c *fiber.Ctx) error {
 
 	// ดึงรหัสผ่านที่แฮชและ role จากฐานข้อมูล
 	var storedHashedPassword, role string
-	err := utils.DB.QueryRow("SELECT password, role FROM users WHERE username=$1", user.Username).Scan(&storedHashedPassword, &role)
+	var userID int
+	err := utils.DB.QueryRow("SELECT id, password, role FROM users WHERE username=$1", user.Username).Scan(&userID, &storedHashedPassword, &role)
 	if err == sql.ErrNoRows {
 		return c.Status(fiber.StatusUnauthorized).SendString("Invalid username or password")
 	} else if err != nil {
@@ -81,7 +82,9 @@ func LoginHandler(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"token": token,
-		"role":  role,
+		"token":    token,
+		"role":     role,
+		"username": user.Username,
+		"id":       userID,
 	})
 }
