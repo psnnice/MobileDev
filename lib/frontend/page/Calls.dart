@@ -1,4 +1,5 @@
 import 'dart:convert'; // ใช้สำหรับแปลง JSON
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // ใช้สำหรับดึงข้อมูลจาก API
@@ -46,7 +47,7 @@ class _ContacPageState extends State<Contact> {
               "title"         : contact["title"]        ?? "",
               "email"         : contact["email"]        ?? "",
               "phoneNumber"   : contact["phoneNumber"]  ?? "",
-              "url"           : contact["url"]          ?? "",
+              "url"           : contact["url"]          ?? "",            
             };
           }).toList();
         });
@@ -114,6 +115,15 @@ class _ContacPageState extends State<Contact> {
 
   
   {
+    Uint8List? imageBytes;
+    Uint8List? profileImageBytes;
+    if (imagePath.isNotEmpty) {
+      imageBytes = base64Decode(imagePath);
+    }
+    if (profileImage.isNotEmpty) {
+      profileImageBytes = base64Decode(profileImage);
+    }
+
     String userRole = Provider.of<UserProvider>(context).role; // เก็บข้อมูลข่าวจาก API
     return GestureDetector(
       onTap: () async {
@@ -132,19 +142,20 @@ class _ContacPageState extends State<Contact> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // รูปภาพด้านบนของการ์ด
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    topRight: Radius.circular(8),
+                if (imageBytes != null)
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                    ),
+                    child: Image.memory(
+                      imageBytes,
+                      fit: BoxFit.fill,
+                      width: double.infinity,
+                      height: 150,
+                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 150),
+                    ),
                   ),
-                  child: Image.network(
-                    imagePath,
-                    fit: BoxFit.fill,
-                    width: double.infinity,
-                    height: 150,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 150),
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 40.0),
                   child: Column(
@@ -154,15 +165,16 @@ class _ContacPageState extends State<Contact> {
                       Row(
                         children: [
                           // รูปภาพพร้อมกรอบวงกลม
-                          ClipOval(
-                            child: Image.network(
-                              profileImage,
-                              width: 40,
-                              height: 40,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, size: 40),
+                          if (profileImageBytes != null)
+                            ClipOval(
+                              child: Image.memory(
+                                profileImageBytes,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.person, size: 40),
+                              ),
                             ),
-                          ),
                           const SizedBox(width: 20),
                           Expanded(
                             child: Text(

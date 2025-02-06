@@ -5,12 +5,13 @@ import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:typed_data';
 import 'Basepage.dart';
 import 'postFunction/AddNews.dart';
 import 'updateFunction/updateNews.dart';
 import 'deleteFunction/DeleteNews.dart';
 
-var ip = Config.ip;//อย่าลืมเปลี่ยน ip
+var ip = Config.ip; // อย่าลืมเปลี่ยน ip
 
 class News extends StatefulWidget {
   const News({super.key});
@@ -36,7 +37,15 @@ class _NewsPageState extends State<News> {
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
         setState(() {
-          newsData = data; // เก็บข้อมูลไว้ใน state
+          newsData = data.map((news) {
+            return {
+              "id": news["id"] ?? '',
+              "imagePath": news["imagePath"] ?? '',
+              "title": news["title"] ?? '',
+              "content": news["content"] ?? '',
+              "url": news["url"] ?? '',
+            };
+          }).toList(); // เก็บข้อมูลไว้ใน state
         });
       } else {
         throw Exception('Failed to load news');
@@ -54,6 +63,7 @@ class _NewsPageState extends State<News> {
   @override
   Widget build(BuildContext context) {
     String userRole = Provider.of<UserProvider>(context).role;
+
     return BasePage(
       body: Stack(
         children: [
@@ -100,6 +110,11 @@ class _NewsPageState extends State<News> {
     required String url,
     required String userRole,
   }) {
+    Uint8List? imageBytes;
+    if (imagePath.isNotEmpty) {
+      imageBytes = base64Decode(imagePath);
+    }
+
     return GestureDetector(
       onTap: () async {
         if (await canLaunchUrl(Uri.parse(url))) {
@@ -117,27 +132,28 @@ class _NewsPageState extends State<News> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // รูปภาพด้านบนของการ์ด
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(8),
-                    topRight: Radius.circular(8),
+                if (imageBytes != null)
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(8),
+                      topRight: Radius.circular(8),
+                    ),
+                    child: Image.memory(
+                      imageBytes,
+                      fit: BoxFit.fill,
+                      width: double.infinity,
+                      height: 150,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey,
+                          height: 150,
+                          child: const Center(
+                            child: Icon(Icons.broken_image, size: 50),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  child: Image.network(
-                    imagePath,
-                    fit: BoxFit.fill,
-                    width: double.infinity,
-                    height: 150,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.grey,
-                        height: 150,
-                        child: const Center(
-                          child: Icon(Icons.broken_image, size: 50),
-                        ),
-                      );
-                    },
-                  ),
-                ),
                 // ข้อความหัวข้อและเนื้อหา
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 40.0),
@@ -164,7 +180,7 @@ class _NewsPageState extends State<News> {
             // ใช้ Positioned สำหรับไอคอนมุมล่างขวา
             const Positioned(
               bottom: 8, // ระยะห่างจากขอบล่าง
-              right: 8,  // ระยะห่างจากขอบขวา
+              right: 8, // ระยะห่างจากขอบขวา
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -226,7 +242,6 @@ class _NewsPageState extends State<News> {
                       ),
                     ),
                     const SizedBox(height: 10),
-
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
