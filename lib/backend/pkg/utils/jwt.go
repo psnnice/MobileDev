@@ -12,7 +12,6 @@ var jwtSecret []byte
 
 // โหลดค่า JWT Secret จาก .env
 func init() {
-
 	// โหลดไฟล์ .env
 	err := godotenv.Load()
 	if err != nil {
@@ -32,7 +31,7 @@ func init() {
 func GenerateToken(username, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"username": username,
-		"role":     role,                                 // เพิ่ม role ใน claims
+		"role":     role,                                  // เพิ่ม role ใน claims
 		"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token หมดอายุใน 24 ชั่วโมง
 	}
 
@@ -53,7 +52,7 @@ func ValidateToken(tokenStr string) (map[string]interface{}, error) {
 			"role":     claims["role"],
 		}
 		return result, nil
-		
+
 	} else {
 		return nil, err
 	}

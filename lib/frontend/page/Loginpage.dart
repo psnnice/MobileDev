@@ -5,10 +5,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
+import 'package:up_transit/frontend/page/token.dart';
 import 'Home.dart';
 import 'RegisterPage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
 
 var ip = Config.ip;//อย่าลืมเปลี่ยน ip
 
@@ -37,11 +39,12 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final SecureStorage secureStorage = SecureStorage(); // เพิ่มบรรทัดนี้
 
   bool _isLoading = false;
 
   // func Register
-  Future<void> _login() async {
+    Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -63,11 +66,18 @@ class _LoginPageState extends State<LoginPage> {
 
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
-          final role = data['role'];// ดึง role จาก response
-          
+          final role = data['role']; // ดึง role จาก response
+          final token = data['token']; // ดึง token จาก response
+
+          // บันทึก token
+          await secureStorage.saveToken(token);
+
+          bool hasToken = await secureStorage.hasToken();
+          print('Token exists: $hasToken'); // พิมพ์ผลลัพธ์ลงใน console
+
           Provider.of<UserProvider>(context, listen: false).setRole(role);
 
-          if(role == 'user' || role == 'admin'){
+          if (role == 'user' || role == 'admin') {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => Home()),
@@ -86,21 +96,14 @@ class _LoginPageState extends State<LoginPage> {
               content: Text(response.body.isNotEmpty
                   ? response.body
                   : 'Login failed. Please try again.'),
-              backgroundColor: Colors.red,
             ),
           );
         }
-      } catch (error) {
+      } catch (e) {
         setState(() {
           _isLoading = false;
         });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Unable to connect to the server.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        print('Error: $e');
       }
     }
   }

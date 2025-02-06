@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:up_transit/frontend/page/Calls.dart';
-
+import 'package:up_transit/frontend/page/token.dart';
 List<Map<String, String>> contactData = [];
 
 void showAddContactDialog(BuildContext context) {
@@ -113,11 +113,16 @@ void showAddContactDialog(BuildContext context) {
 
                 // เพิ่มข้อมูลใหม่ลงใน contactData
                 contactData.add(newContact);
+                final secureStorage = SecureStorage();
+                final token = await secureStorage.getToken();
 
                 // ส่งข้อมูลไปยัง path /contacts
                 final response = await http.post(
                   Uri.parse('http://$ip:8080/contacts'),
-                  headers: {"Content-Type": "application/json"},
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer $token"
+                  },
                   body: jsonEncode(newContact),
                 );
 

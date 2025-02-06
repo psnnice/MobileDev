@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:up_transit/frontend/page/Calls.dart';
+import 'package:up_transit/frontend/page/token.dart';
 
 void showUpdateContactDialog(BuildContext context, int id, Map<String, String> currentContact) {
   final _formKey = GlobalKey<FormState>();
@@ -105,10 +106,14 @@ void showUpdateContactDialog(BuildContext context, int id, Map<String, String> c
                   "phoneNumber": _phoneNumberController.text,
                   "url": _urlController.text,
                 };
-
+                final secureStorage = SecureStorage();
+                final token = await secureStorage.getToken();
+                
                 final response = await http.put(
                   Uri.parse('http://$ip:8080/contacts/$id'),
-                  headers: {"Content-Type": "application/json"},
+                  headers: {"Content-Type": "application/json",
+                  'Authorization': 'Bearer $token',
+                  },
                   body: jsonEncode(updatedContact),
                 );
 

@@ -5,8 +5,9 @@ import 'dart:math';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:up_transit/frontend/page/configip/config.dart';
-
+import 'package:up_transit/frontend/page/token.dart';
 var ip = Config.ip;
+
 
 Future<List<Map<String, dynamic>>> loadRouteData() async {
   final contents = await rootBundle.loadString('assets/jsonFile/route1.json');
@@ -18,9 +19,24 @@ Future<void> InsertDeviceData(List<DeviceData> deviceDataList) async {
   final url = Uri.parse('http://$ip:8080/DataBus'); // เปลี่ยน path เป็น /DataBus
   final body = json.encode(deviceDataList.map((data) => data.toJson()).toList());
   print('Sending data: $body'); // พิมพ์ข้อมูลที่ถูกส่ง
+
+  // ดึง token จาก SecureStorage
+  final secureStorage = SecureStorage();
+  final token = await secureStorage.getToken();
+
+  if (token == null) {
+    print('Error: Missing token');
+    return;
+  }
+
+  print('Token: $token');
+  
   final response = await http.post(
     url,
-    headers: {'Content-Type': 'application/json'},
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token', // เพิ่ม token ใน header
+    },
     body: body,
   );
 

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:up_transit/frontend/page/News.dart';
+import 'package:up_transit/frontend/page/token.dart';
 
 Future<void> deleteNews(BuildContext context, int id) async {
   final url = Uri.parse('http://$ip:8080/news/$id');
+  final SecureStorage secureStorage = SecureStorage();
 
   try {
-    final response = await http.delete(url);
+    final response = await secureStorage.deleteRequest(url.toString());
 
     if (response.statusCode == 200) {
       // ลบสำเร็จ

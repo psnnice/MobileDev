@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:up_transit/frontend/page/sidebar.dart';
 
 class BasePage extends StatefulWidget {
   final Widget body;
@@ -13,6 +15,7 @@ class BasePage extends StatefulWidget {
 }
 
 class BasePageState extends State<BasePage> {
+  final _storage = FlutterSecureStorage();
   final List<String> routes = ['/News', '/Bus', '/', '/Map', '/Contact'];
   int _selectedIndex = 0;
 
@@ -29,8 +32,9 @@ class BasePageState extends State<BasePage> {
     });
   }
 
-  void _logout() {
+  void _logout() async {
     // Handle logout logic here
+    await _storage.delete(key: 'token');
     Navigator.pushReplacementNamed(context, '/login');
   }
 
@@ -73,12 +77,7 @@ class BasePageState extends State<BasePage> {
             backgroundColor: Colors.transparent, // Make background transparent to show gradient
             elevation: 0, // Remove shadow
             actions: [
-              IconButton(
-                icon: const Icon(Icons.logout),
-                color: Colors.black,
-                onPressed: _logout,
-                tooltip: 'Logout',
-              ),
+              SidebarButton(),
             ],
           ),
         ),
@@ -124,6 +123,7 @@ class BasePageState extends State<BasePage> {
           elevation: 0,  // Make background transparent to show gradient
         ),
       ),
+      endDrawer: EndDrawer(),
     );
   }
 }

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:up_transit/frontend/page/News.dart';
-
+import 'package:up_transit/frontend/page/token.dart';
 List<Map<String, String>> newsData = [];
 
 void showAddNewsDialog(BuildContext context) {
@@ -86,10 +86,13 @@ void showAddNewsDialog(BuildContext context) {
                 };
 
                 newsData.add(newNews);
-
+                final secureStorage = SecureStorage();
+                final token = await secureStorage.getToken();
                 final response = await http.post(
                   Uri.parse('http://$ip:8080/news'),
-                  headers: {"Content-Type": "application/json"},
+                  headers: {"Content-Type": "application/json",
+                  "Authorization": "Bearer $token",
+                  },
                   body: jsonEncode(newNews),
                 );
 
