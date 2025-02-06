@@ -198,9 +198,9 @@ void showAddContactDialog(BuildContext context) {
                               border: InputBorder.none,
                               hintText: 'Phone Number',
                             ),
-                            keyboardType: TextInputType.number,
+                            keyboardType: TextInputType.phone,
                             inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.digitsOnly
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9 ]')),
                             ],
                             validator: (value) {
                               if (value == null || value.isEmpty) {
