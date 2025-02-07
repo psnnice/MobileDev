@@ -1,6 +1,6 @@
-// ignore_for_file: prefer_const_constructors
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/Bus.dart';
 import 'package:up_transit/frontend/page/Calls.dart';
@@ -10,7 +10,9 @@ import 'package:up_transit/frontend/page/Map.dart';
 import 'package:up_transit/frontend/page/News.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await requestPermissions();
   runApp(
     MultiProvider(
       providers: [
@@ -21,11 +23,22 @@ void main() {
   );
 }
 
+Future<void> requestPermissions() async {
+  Map<Permission, PermissionStatus> statuses = await [
+    Permission.storage,
+    Permission.location,
+  ].request();
+
+  if (statuses.values.any((status) => status.isDenied || status.isPermanentlyDenied)) {
+    // If any permission is denied, exit the app
+    Future.delayed(Duration.zero, () {
+      SystemNavigator.pop();
+    });
+  }
+}
 
 class LinkPage extends StatelessWidget {  
   const LinkPage({super.key});
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +52,6 @@ class LinkPage extends StatelessWidget {
         '/'       : (context) =>  Home(),
         '/Map'    : (context) =>  map(),
         '/Contact': (context) =>  Contact(),
-        
       },
     );
   }
