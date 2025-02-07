@@ -7,6 +7,7 @@ import (
 
 	"flutter_project/internals/description_map"
 	"flutter_project/internals/news"
+	"flutter_project/internals/profile"
 	"flutter_project/pkg/middleware"
 
 	"github.com/gofiber/fiber/v2"
@@ -31,4 +32,7 @@ func SetupRoutes(app *fiber.App) {
 	app.Get("/contacts", contacts.GetContactHandler)
 	app.Put("/contacts/:id", middleware.CheckToken, contacts.UpdateContactHandler)
 	app.Delete("/contacts/:id", middleware.CheckToken, contacts.DeleteContactHandler)
+
+	app.Post("/user_profile", middleware.CheckToken, profile.UploadProfileHandler)
+
 }
