@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -109,6 +110,10 @@ class _MapState extends State<Map> {
               controller: _pageController,
               onPageChanged: _onPageChanged,
               children: routeData.map((route) {
+                Uint8List? imageBytes;
+                if (route['image_path'].isNotEmpty) {
+                  imageBytes = base64Decode(route['image_path']);
+                }
                 return GestureDetector(
                   child: Container(
                     margin: const EdgeInsets.all(10),
@@ -125,38 +130,40 @@ class _MapState extends State<Map> {
                       ],
                     ),
                     child: Column(
-                                            children: [
+                      children: [
                         const SizedBox(height: 20),
                         Stack(
                           children: [
-                        FractionallySizedBox(
-                          widthFactor: 0.9,
-                          child: Image.asset('${route['image_path']}'),
-                        ),
-                        if (userRole == 'admin')
-                          Positioned(
-                            top: 10,
-                            right: 10,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: IconButton(
-                                icon: Icon(Icons.edit, color: Colors.blue),
-                                onPressed: () {
-                                  showUpdateDescriptionDialog(context, route['id'], {
-                                    "route_name": route['route_name'],
-                                    "image_path": route['image_path'],
-                                    "description": route['description'],
-                                    "station_list": route['station_list'],
-                                    "note": route['note'],
-                                  });
-                                },
-                              ),
+                            FractionallySizedBox(
+                              widthFactor: 0.9,
+                              child: imageBytes != null
+                                  ? Image.memory(imageBytes, fit: BoxFit.cover)
+                                  : const Icon(Icons.broken_image, size: 150),
                             ),
-                          ),
-                        ],
+                            if (userRole == 'admin')
+                              Positioned(
+                                top: 10,
+                                right: 10,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(Icons.edit, color: Colors.blue),
+                                    onPressed: () {
+                                      showUpdateDescriptionDialog(context, route['id'], {
+                                        "route_name": route['route_name'],
+                                        "image_path": route['image_path'],
+                                        "description": route['description'],
+                                        "station_list": route['station_list'],
+                                        "note": route['note'],
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 10),
                         Text(
@@ -179,7 +186,7 @@ class _MapState extends State<Map> {
                               style: const TextStyle(fontSize: 14, color: Colors.grey),
                             ),
                           ),
-                          ],
+                      ],
                     ),
                   ),
                 );
