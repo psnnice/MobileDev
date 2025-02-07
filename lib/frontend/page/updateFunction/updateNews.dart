@@ -60,19 +60,18 @@ void showUpdateNewsDialog(BuildContext context, int id, Map<String, dynamic> cur
                               Container(
                                 child: Image.file(
                                   _imageFile!,
-                                  width: 40,
-                                  height: 40,
+                                  width: 60,
+                                  height: 60,
                                   fit: BoxFit.cover,
                                 ),
                               ),
                               Positioned(
-                                bottom: 15,
-                                left: 15,
+                                bottom: 35,
+                                left: 35,
                                 child: IconButton(
-                                  icon: Icon(
-                                    Icons.cancel_outlined,
-                                    color: Colors.red,
-                                    size: 25,
+                                  icon: Icon(Icons.cancel_outlined,   
+                                  color: Colors.red,              
+                                  size: 25
                                   ),
                                   onPressed: () {
                                     setState(() {

@@ -42,12 +42,11 @@ void showAddNewsDialog(BuildContext context) {
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(Icons.add_photo_alternate_rounded ),
+                          icon: Icon(Icons.add_photo_alternate_rounded),
                           onPressed: () => _pickImage(setState),
                         ),
                         SizedBox(width: 8),
                         Text(_imageFile != null ? 'Image Selected' : 'No Image Selected'),
-
                         SizedBox(width: 10),
                         if (_imageFile != null)
                           Stack(
@@ -56,18 +55,19 @@ void showAddNewsDialog(BuildContext context) {
                               Container(
                                 child: Image.file(
                                   _imageFile!,
-                                  width: 40,
-                                  height: 40,
+                                  width: 60,
+                                  height: 60,
                                   fit: BoxFit.cover,
                                 ),
                               ),
                               Positioned(
-                                bottom: 15,
-                                left: 15,
+                                bottom: 35,
+                                left: 35,
                                 child: IconButton(
-                                  icon: Icon(Icons.cancel_outlined,   
-                                  color: Colors.red,              
-                                  size: 15
+                                  icon: Icon(
+                                    Icons.cancel_outlined,
+                                    color: Colors.red,
+                                    size: 25,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -184,7 +184,6 @@ void showAddNewsDialog(BuildContext context) {
                   "content": _contentController.text,
                   "url": _urlController.text,
                   "created_by": createBy, // เพิ่ม created_by ตามโครงสร้างฐานข้อมูล
-                  
                 };
                 print(createBy);
                 newsData.add(news);
@@ -200,7 +199,6 @@ void showAddNewsDialog(BuildContext context) {
                 );
 
                 if (response.statusCode == 201) {
-                  
                   Navigator.of(context).pop(); // ปิด dialog
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (context) => News()),
