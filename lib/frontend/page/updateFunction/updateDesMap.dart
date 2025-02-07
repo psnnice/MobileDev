@@ -90,6 +90,7 @@ void showUpdateDescriptionDialog(BuildContext context, int id, Map<String, dynam
                         return null;
                       },
                     ),
+                    SizedBox(height: 10),
                     Row(
                       children: [
                         IconButton(
@@ -98,6 +99,37 @@ void showUpdateDescriptionDialog(BuildContext context, int id, Map<String, dynam
                         ),
                         SizedBox(width: 8),
                         Text(_imageFile != null ? 'Image Selected' : 'No Image Selected'),
+                        SizedBox(width: 10),
+                        if (_imageFile != null)
+                            Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                child: Image.file(
+                                  _imageFile!,
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 30,
+                                left: 30,
+                                child: IconButton(
+                                  icon: Icon(
+                                    Icons.cancel_outlined,
+                                    color: Colors.red,
+                                    size: 30,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _imageFile = null;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
                       ],
                     ),
                     const SizedBox(height: 20),
