@@ -40,6 +40,8 @@ void showUpdateContactDialog(BuildContext context, int id, Map<String, String> c
   showDialog(
     context: context,
     builder: (BuildContext context) {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        final int? userId = userProvider.id;
       return AlertDialog(
         title: Text('Update Contact'),
         content: StatefulBuilder(
@@ -271,17 +273,16 @@ void showUpdateContactDialog(BuildContext context, int id, Map<String, String> c
                 }
 
                 // ✅ ดึง user_id จาก Provider
-                final userProvider = Provider.of<UserProvider>(context, listen: false);
-                final int? userId = userProvider.id;
 
                 final updatedContact = {
                   "imagePath": _imageFile != null ? base64Encode(_imageFile!.readAsBytesSync()) : currentContact["imagePath"] ?? '',
                   "profileImage": _profileImageFile != null ? base64Encode(_profileImageFile!.readAsBytesSync()) : currentContact["profileImage"] ?? '',
                   "title": _titleController.text,
                   "email": _emailController.text.isNotEmpty ? _emailController.text : null,
-                  "phone_number": _phoneNumberController.text.isNotEmpty ? _phoneNumberController.text : null,
+                  "phoneNumber": _phoneNumberController.text.isNotEmpty ? _phoneNumberController.text : null,
                   "url": _urlController.text,
                   if (userId != null) "user_id": userId, // ส่ง user_id ถ้ามีค่า
+                  "created_at": DateTime.now().toString(),
                 };
 
                 final response = await http.put(

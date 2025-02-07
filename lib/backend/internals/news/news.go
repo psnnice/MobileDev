@@ -3,6 +3,7 @@ package news
 import (
 	"database/sql"
 	"flutter_project/pkg/utils"
+	"log"
 	"net/http"
 	"time"
 
@@ -15,7 +16,7 @@ type News struct {
 	Title     string `json:"title"`
 	Content   string `json:"content"`
 	URL       string `json:"url"`
-	CreatedBy int    `json:"createdBy"` // เพิ่ม createdBy
+	CreatedBy int    `json:"created_by"`
 	CreatedAt string `json:"createdAt"`
 }
 
@@ -136,36 +137,56 @@ func InsertNews(db *sql.DB, news News) error {
 func UpdateNewsHandler(c *fiber.Ctx) error {
 	id, err := c.ParamsInt("id")
 	if err != nil {
-		return c.Status(http.StatusBadRequest).SendString("Invalid news ID")
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid news ID")
 	}
 
 	var news News
 	if err := c.BodyParser(&news); err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString("Invalid request payload: " + err.Error())
+		log.Println("Error decoding JSON:", err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": "Invalid request data"})
 	}
 
-	// Validate news data if necessary
-	if news.Title == "" || news.Content == "" {
-		return c.Status(fiber.StatusBadRequest).SendString("Missing required news fields")
+	log.Println("Received Update Request:", news) // 🔍 Log ค่าที่ได้รับ
+
+	// ตรวจสอบว่า created_by มีอยู่ใน users หรือไม่
+	exists, err := checkUserExists(news.CreatedBy)
+	if err != nil {
+		log.Println("Error checking user existence:", err)
+	}
+	if !exists {
+		log.Println("Invalid created_by:", news.CreatedBy)
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid created_by: User does not exist")
 	}
 
-	// Call UpdateNews function to update the news
-	if err := UpdateNews(utils.DB, id, news); err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Failed to update news: " + err.Error())
+	// อัปเดตข่าว
+	if err := UpdateNews(id, news); err != nil {
+		log.Println("Error updating news:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Error": "Unable to update news"})
 	}
 
-	return c.Status(http.StatusOK).SendString("News updated successfully")
+	return c.JSON(fiber.Map{"message": "News updated successfully"})
 }
 
-// อัปเดตข่าวในฐานข้อมูล
-func UpdateNews(db *sql.DB, id int, news News) error {
-	query := `
-        UPDATE news
-        SET image_path = $1, title = $2, content = $3, url = $4, created_by = $5, created_at = $6
-        WHERE id = $7
-    `
-	_, err := db.Exec(query, news.ImagePath, news.Title, news.Content, news.URL, news.CreatedBy, news.CreatedAt, id)
-	return err
+// ✅ ฟังก์ชันตรวจสอบว่าผู้ใช้มีอยู่จริงหรือไม่
+
+// ฟังก์ชันอัปเดตข้อมูลในฐานข้อมูล
+func UpdateNews(id int, news News) error {
+	if utils.DB == nil {
+		log.Println("การเชื่อมต่อฐานข้อมูลล้มเหลว")
+		return fiber.NewError(fiber.StatusInternalServerError, "ไม่สามารถเชื่อมต่อฐานข้อมูล")
+	}
+
+	_, err := utils.DB.Exec(`
+    UPDATE news
+    SET image_path = $1, title = $2, content = $3, url = $4, created_by = NULLIF($5, 0), created_at = NOW()
+    WHERE id = $6
+`, news.ImagePath, news.Title, news.Content, news.URL, news.CreatedBy, id)
+	if err != nil {
+		log.Println("Errorในการอัปเดตข้อมูล:", err)
+		return err
+	}
+
+	return nil
 }
 
 // ลบข่าวจากฐานข้อมูล

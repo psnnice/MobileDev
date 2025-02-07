@@ -9,9 +9,9 @@ import 'package:up_transit/frontend/page/deleteFunction/DeleteContact.dart';
 import 'package:up_transit/frontend/page/postFunction/AddContact.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
-import 'updateFunction/updateContact.dart';
 
 import 'Basepage.dart';
+import 'updateFunction/updateContact.dart';
 
 var ip = Config.ip; // อย่าลืมเปลี่ยน IP
 
@@ -286,7 +286,7 @@ class _ContacPageState extends State<Contact> {
                             "profileImage": profileImage,
                             "title": title,
                             "email": email,
-                            "phoneNumber": phoneNumber,
+                            "phone_number": phoneNumber,
                             "url": url,
                           });
                         },

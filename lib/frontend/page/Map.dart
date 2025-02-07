@@ -2,10 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:up_transit/frontend/page/Calls.dart';
+import 'package:provider/provider.dart';
+import 'package:up_transit/frontend/page/configip/config.dart';
+import 'package:up_transit/frontend/page/providers/user_provider.dart';
+import 'package:up_transit/frontend/page/updateFunction/updateDesMap.dart';
 
 import 'BasePage.dart';
-import 'token.dart';
+
+var ip = Config.ip;
 
 class Map extends StatefulWidget {
   const Map({super.key});
@@ -17,37 +21,36 @@ class Map extends StatefulWidget {
 class _MapState extends State<Map> {
   final PageController _pageController = PageController();
   int _selectedIndex = 0;
-  List<dynamic> _routes = [];
+  List<dynamic> routeData = [];
 
   @override
   void initState() {
     super.initState();
-    print("Fetching routes...");
     _fetchRoutes();
   }
 
   Future<void> _fetchRoutes() async {
-    final secureStorage = SecureStorage();
-    final token = await secureStorage.getToken();
-    final response = await http.get(
-      Uri.parse('http://$ip:8080/description_map'), // ปรับ API ให้ตรงกับ table ใหม่
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-    );
-
-    if (response.statusCode == 200) {
-      setState(() {
-        _routes = json.decode(utf8.decode(response.bodyBytes));;
-      });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to fetch routes'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    try {
+      final response = await http.get(Uri.parse('http://$ip:8080/description_map'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        setState(() {
+          routeData = data.map((route) {
+            return {
+              "id": route["id"] ?? "",
+              "route_name": route["route_name"] ?? "",
+              "image_path": route["image_path"] ?? "",
+              "description": route["description"] ?? "",
+              "station_list": route["station_list"] ?? "",
+              "note": route["note"] ?? "",
+            };
+          }).toList();
+        });
+      } else {
+        throw Exception('Failed to load routes');
+      }
+    } catch (e) {
+      debugPrint('Error fetching routes: $e');
     }
   }
 
@@ -65,42 +68,10 @@ class _MapState extends State<Map> {
     );
   }
 
-  void _showImageDialog(BuildContext context, String imagePath) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-
-          child: Column(
-            children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 1,
-                height: MediaQuery.of(context).size.height * 0.75,
-                child: InteractiveViewer(
-                  child: Image.asset(imagePath),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text(
-                  'Close',
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    String userRole = Provider.of<UserProvider>(context).role;
+
     return BasePage(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -110,7 +81,7 @@ class _MapState extends State<Map> {
             padding: const EdgeInsets.symmetric(horizontal: 15.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_routes.length, (index) {
+              children: List.generate(routeData.length, (index) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: SizedBox(
@@ -123,7 +94,7 @@ class _MapState extends State<Map> {
                         elevation: _selectedIndex == index ? 10 : 0,
                       ),
                       child: Text(
-                        _routes[index]['route_name'],
+                        routeData[index]['route_name'],
                         style: const TextStyle(color: Colors.black),
                       ),
                     ),
@@ -137,9 +108,8 @@ class _MapState extends State<Map> {
             child: PageView(
               controller: _pageController,
               onPageChanged: _onPageChanged,
-              children: _routes.map((route) {
+              children: routeData.map((route) {
                 return GestureDetector(
-                  onTap: () => _showImageDialog(context,'${route['image_path']}'),
                   child: Container(
                     margin: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -155,11 +125,38 @@ class _MapState extends State<Map> {
                       ],
                     ),
                     child: Column(
-                      children: [
+                                            children: [
                         const SizedBox(height: 20),
+                        Stack(
+                          children: [
                         FractionallySizedBox(
                           widthFactor: 0.9,
                           child: Image.asset('${route['image_path']}'),
+                        ),
+                        if (userRole == 'admin')
+                          Positioned(
+                            top: 10,
+                            right: 10,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: IconButton(
+                                icon: Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () {
+                                  showUpdateDescriptionDialog(context, route['id'], {
+                                    "route_name": route['route_name'],
+                                    "image_path": route['image_path'],
+                                    "description": route['description'],
+                                    "station_list": route['station_list'],
+                                    "note": route['note'],
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
                         ),
                         const SizedBox(height: 10),
                         Text(
@@ -182,7 +179,7 @@ class _MapState extends State<Map> {
                               style: const TextStyle(fontSize: 14, color: Colors.grey),
                             ),
                           ),
-                      ],
+                          ],
                     ),
                   ),
                 );

@@ -20,6 +20,7 @@ func SetupRoutes(app *fiber.App) {
 	app.Get("/DataBus", bus.GetDeviceDataHandler)
 
 	app.Get("/description_map", description_map.GetDescriptionMapHandler)
+	app.Put("/description_map/:id", middleware.CheckToken, description_map.UpdateDescriptionMapHandler)
 
 	app.Post("/news", middleware.CheckToken, news.InsertNewsHandler)
 	app.Get("/news", news.GetNewsHandler)

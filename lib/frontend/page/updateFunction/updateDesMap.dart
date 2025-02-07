@@ -5,48 +5,51 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:up_transit/frontend/page/News.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:up_transit/frontend/page/token.dart';
 
 var ip = Config.ip;
 
-class NewsData {
+class RouteDescriptionData {
   final int id;
-  final String title;
-  final String content;
-  final String url;
+  final String routeName;
+  final String description;
+  final String stationList;
+  final String note;
   final String? imagePath;
   final int? createdBy;
   final String? createdAt;
 
-  NewsData({
+  RouteDescriptionData({
     required this.id,
-    required this.title,
-    required this.content,
-    required this.url,
-    required this.imagePath,
-    required this.createdBy,
-    required this.createdAt,
+    required this.routeName,
+    required this.description,
+    required this.stationList,
+    required this.note,
+    this.imagePath,
+    this.createdBy,
+    this.createdAt,
   });
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'title': title,
-        'content': content,
-        'url': url,
+        'route_name': routeName,
+        'description': description,
+        'station_list': stationList,
+        'note': note,
         'image_path': imagePath,
         'created_by': createdBy,
-        'created_at': createdAt ?? DateTime.now().toString(),
+        'created_at': DateTime.now().toString(),
       };
 }
 
-void showUpdateNewsDialog(BuildContext context, int id, Map<String, dynamic> currentNews) {
+void showUpdateDescriptionDialog(BuildContext context, int id, Map<String, String> currentData) {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController(text: currentNews["title"] ?? "");
-  final TextEditingController _contentController = TextEditingController(text: currentNews["content"] ?? "");
-  final TextEditingController _urlController = TextEditingController(text: currentNews["url"] ?? "");
+  final TextEditingController _routeName = TextEditingController(text: currentData["route_name"]);
+  final TextEditingController _descriptionController = TextEditingController(text: currentData["description"]);
+  final TextEditingController _stationListController = TextEditingController(text: currentData["station_list"]);
+  final TextEditingController _noteController = TextEditingController(text: currentData["note"] ?? "");
 
   File? _imageFile;
 
@@ -63,8 +66,9 @@ void showUpdateNewsDialog(BuildContext context, int id, Map<String, dynamic> cur
     context: context,
     builder: (BuildContext context) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final int? createBy = userProvider.id;
       return AlertDialog(
-        title: Text('Update News'),
+        title: Text('Update Route Description'),
         content: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Form(
@@ -73,14 +77,14 @@ void showUpdateNewsDialog(BuildContext context, int id, Map<String, dynamic> cur
                 child: Column(
                   children: [
                     TextFormField(
-                      controller: _titleController,
+                      controller: _routeName,
                       decoration: const InputDecoration(
-                        labelText: 'Title',
+                        labelText: 'Route Name',
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter title';
+                          return 'Please enter route name';
                         }
                         return null;
                       },
@@ -97,23 +101,31 @@ void showUpdateNewsDialog(BuildContext context, int id, Map<String, dynamic> cur
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
-                      controller: _contentController,
+                      controller: _descriptionController,
                       decoration: const InputDecoration(
-                        labelText: 'Content',
+                        labelText: 'Description',
                         border: OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter content';
+                          return 'Please enter description';
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
-                      controller: _urlController,
+                      controller: _stationListController,
                       decoration: const InputDecoration(
-                        labelText: 'URL',
+                        labelText: 'Station List',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _noteController,
+                      decoration: const InputDecoration(
+                        labelText: 'Note',
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -135,51 +147,39 @@ void showUpdateNewsDialog(BuildContext context, int id, Map<String, dynamic> cur
               if (_formKey.currentState!.validate()) {
                 final secureStorage = SecureStorage();
                 final token = await secureStorage.getToken();
-                
+
                 if (token == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Error: Missing token'), backgroundColor: Colors.red),
                   );
                   return;
-                } 
-
-                final int? createdBy = userProvider.id;
-                print("Created By ID: $createdBy");
-                // ตรวจสอบว่า createdBy ไม่เป็น null และมากกว่า 0
-                if (createdBy == null || createdBy <= 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: Invalid user ID'), backgroundColor: Colors.red),
-                  );
-                  return;
                 }
 
-                final updatedNews = NewsData(
+                final updatedData = RouteDescriptionData(
                   id: id,
-                  title: _titleController.text,
-                  content: _contentController.text,
-                  url: _urlController.text,
-                  imagePath: _imageFile != null ? base64Encode(_imageFile!.readAsBytesSync()) : currentNews["image_path"] ?? '',
-                  createdBy: createdBy,
-                  createdAt: currentNews["created_at"] ?? DateTime.now().toString(),
+                  routeName: _routeName.text,
+                  description: _descriptionController.text,
+                  stationList: _stationListController.text,
+                  note: _noteController.text,
+                  imagePath: _imageFile != null ? base64Encode(_imageFile!.readAsBytesSync()) : currentData["image"] ?? '',
+                  createdBy: createBy,
+                  createdAt: DateTime.now().toString(),
                 ).toJson();
 
                 final response = await http.put(
-                  Uri.parse('http://$ip:8080/news/$id'),
+                  Uri.parse('http://$ip:8080/description_map/$id'),
                   headers: {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer $token",
                   },
-                  body: jsonEncode(updatedNews),
+                  body: jsonEncode(updatedData),
                 );
 
                 if (response.statusCode == 200) {
                   Navigator.of(context).pop();
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => News()),
-                  );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update news'), backgroundColor: Colors.red),
+                    SnackBar(content: Text('Failed to update description'), backgroundColor: Colors.red),
                   );
                 }
               }

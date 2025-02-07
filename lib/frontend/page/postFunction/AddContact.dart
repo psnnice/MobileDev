@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/Calls.dart';
-import 'package:up_transit/frontend/page/token.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
+import 'package:up_transit/frontend/page/token.dart';
 
 List<Map<String, dynamic>> contactData = [];
 
@@ -264,7 +264,7 @@ void showAddContactDialog(BuildContext context) {
                   "profileImage": _profileImageFile != null ? base64Encode(_profileImageFile!.readAsBytesSync()) : '',
                   "title": _titleController.text,
                   "email": _emailController.text,
-                  "phone_number": _phoneNumberController.text,
+                  "phoneNumber": _phoneNumberController.text,
                   "url": _urlController.text,
                   "user_id": Provider.of<UserProvider>(context, listen: false).id,
                 };

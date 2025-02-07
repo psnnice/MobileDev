@@ -184,6 +184,7 @@ void showAddNewsDialog(BuildContext context) {
                   "content": _contentController.text,
                   "url": _urlController.text,
                   "created_by": createBy, // เพิ่ม created_by ตามโครงสร้างฐานข้อมูล
+                  
                 };
                 print(createBy);
                 newsData.add(news);

@@ -24,9 +24,9 @@ type DescriptionMap struct {
 func GetDescriptionMapHandler(c *fiber.Ctx) error {
 	descriptionMapList, err := GetAllDescriptionMaps()
 	if err != nil {
-		log.Println("เกิดข้อผิดพลาดในการดึงข้อมูล:", err)
+		log.Println("เกิดErrorในการดึงข้อมูล:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"ข้อผิดพลาด": "ไม่สามารถดึงข้อมูลเส้นทางได้",
+			"Error": "Unable to retrieve route data",
 		})
 	}
 
@@ -52,7 +52,7 @@ func GetAllDescriptionMaps() ([]DescriptionMap, error) {
 		FROM description_map
 	`)
 	if err != nil {
-		log.Println("ข้อผิดพลาดในการ Query:", err)
+		log.Println("Errorในการ Query:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -75,7 +75,7 @@ func GetAllDescriptionMaps() ([]DescriptionMap, error) {
 			&descriptionMap.CreatedAt,
 		)
 		if err != nil {
-			log.Println("ข้อผิดพลาดในการอ่านข้อมูล:", err)
+			log.Println("Errorในการอ่านข้อมูล:", err)
 			return nil, err
 		}
 
@@ -88,11 +88,56 @@ func GetAllDescriptionMaps() ([]DescriptionMap, error) {
 
 	// ตรวจสอบ error ระหว่างการอ่านข้อมูล
 	if err = rows.Err(); err != nil {
-		log.Println("เกิดข้อผิดพลาดขณะอ่านข้อมูล:", err)
+		log.Println("เกิดErrorขณะอ่านข้อมูล:", err)
 		return nil, err
 	}
 
 	return descriptionMapList, nil
+}
+
+// Handler สำหรับอัปเดตข้อมูล description_map
+func UpdateDescriptionMapHandler(c *fiber.Ctx) error {
+	id := c.Params("id")
+	var descriptionMap DescriptionMap
+
+	if err := c.BodyParser(&descriptionMap); err != nil {
+		log.Println("Errorในการอ่านข้อมูลจาก request:", err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"Error": "Invalid request data",
+		})
+	}
+
+	if err := UpdateDescriptionMap(id, descriptionMap); err != nil {
+		log.Println("เกิดErrorในการอัปเดตข้อมูล:", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"Error": "Unable to update route data",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Data updated successfully",
+	})
+}
+
+// ฟังก์ชันอัปเดตข้อมูลในฐานข้อมูล
+func UpdateDescriptionMap(id string, descriptionMap DescriptionMap) error {
+	if utils.DB == nil {
+		log.Println("การเชื่อมต่อฐานข้อมูลล้มเหลว")
+		return fiber.NewError(fiber.StatusInternalServerError, "ไม่สามารถเชื่อมต่อฐานข้อมูล")
+	}
+
+	_, err := utils.DB.Exec(`
+        UPDATE description_map
+        SET route_name = $1, image_path = $2, description = $3, station_list = $4, note = $5, created_by = $6, created_at = NOW()
+        WHERE id = $7
+	`, descriptionMap.RouteName, descriptionMap.ImagePath, descriptionMap.Description, descriptionMap.StationList, descriptionMap.Note, descriptionMap.CreatedBy, id)
+
+	if err != nil {
+		log.Println("Errorในการอัปเดตข้อมูล:", err)
+		return err
+	}
+
+	return nil
 }
 
 // Helper ฟังก์ชันสำหรับจัดการ NullString
