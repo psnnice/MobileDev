@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/postFunction/AddProfile.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
+import 'dart:io';
 
 final _storage = FlutterSecureStorage();
 
@@ -33,6 +34,7 @@ class EndDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final username = userProvider.username; // สมมติว่ามี username ใน Provider
+    final profileImagePath = userProvider.profileImagePath; // ดึง path ของรูปโปรไฟล์จาก Provider
 
     return Drawer(
       child: Column(
@@ -50,7 +52,9 @@ class EndDrawer extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             currentAccountPicture: CircleAvatar(
-              backgroundImage: NetworkImage("https://i.pravatar.cc/300"), // รูปโปรไฟล์สุ่ม
+              backgroundImage: profileImagePath != null
+                  ? FileImage(File(profileImagePath))
+                  : NetworkImage("https://i.pravatar.cc/300"), // รูปโปรไฟล์สุ่ม
             ),
             accountEmail: null,
           ),
@@ -59,9 +63,15 @@ class EndDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.add_a_photo, color: Colors.blue),
             title: ElevatedButton(
-              onPressed: () {showAddProfileDialog(context);   },
-              child: Text('Edit Profile Picture', style: TextStyle(fontSize: 16, color: Colors.blue),),),
+              onPressed: () {
+                showAddProfileDialog(context);
+              },
+              child: Text(
+                'Edit Profile Picture',
+                style: TextStyle(fontSize: 16, color: Colors.blue),
+              ),
             ),
+          ),
 
           Spacer(), // ดันปุ่ม Logout ไปด้านล่าง
 

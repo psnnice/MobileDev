@@ -22,6 +22,7 @@ void showAddProfileDialog(BuildContext context) {
       });
     }
   }
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -84,7 +85,7 @@ void showAddProfileDialog(BuildContext context) {
                 final int? userId = userProvider.id;
                 final profileData = {
                   "user_id": userId,
-                  "profile_image_path": _imageFile != null ? base64Encode(_imageFile!.readAsBytesSync()) : '',
+                  "profile_image_path": _imageFile!.path,
                 };
 
                 final secureStorage = SecureStorage();
@@ -98,7 +99,10 @@ void showAddProfileDialog(BuildContext context) {
                   body: jsonEncode(profileData),
                 );
 
-                if (response.statusCode == 201) {
+                if (response.statusCode == 201 || response.statusCode == 200) {
+                  // อัปเดตโปรไฟล์ใน Provider
+                  userProvider.setProfileImagePath(_imageFile!.path);
+
                   Navigator.of(context).pop(); // Close dialog
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
