@@ -12,14 +12,14 @@ import 'BasePage.dart';
 
 var ip = Config.ip;
 
-class Map extends StatefulWidget {
-  const Map({super.key});
+class map extends StatefulWidget {
+  const map({super.key});
 
   @override
   _MapState createState() => _MapState();
 }
 
-class _MapState extends State<Map> {
+class _MapState extends State<map> {
   final PageController _pageController = PageController();
   int _selectedIndex = 0;
   List<dynamic> routeData = [];
@@ -136,9 +136,24 @@ class _MapState extends State<Map> {
                           children: [
                             FractionallySizedBox(
                               widthFactor: 0.9,
-                              child: imageBytes != null
-                                  ? Image.memory(imageBytes, fit: BoxFit.cover)
-                                  : const Icon(Icons.broken_image, size: 150),
+                              child: Container(
+                                width: 300, // กำหนดขนาดกว้างของภาพ
+                                height: 200, // กำหนดขนาดสูงของภาพ
+                                decoration: BoxDecoration( // กำหนดเส้นขอบ
+                                  borderRadius: BorderRadius.circular(10), // กำหนดมุมโค้งของกรอบ
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10), // ทำให้ภาพขอบโค้งตามกรอบ
+                                  child: imageBytes != null
+                                      ? Image.memory(
+                                          imageBytes,
+                                          fit: BoxFit.fill, // ปรับภาพให้เต็มกรอบ
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              const Icon(Icons.broken_image, size: 100),
+                                        )
+                                      : const Icon(Icons.broken_image, size: 100),
+                                ),
+                              ),
                             ),
                             if (userRole == 'admin')
                               Positioned(
@@ -150,7 +165,7 @@ class _MapState extends State<Map> {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: IconButton(
-                                    icon: Icon(Icons.edit, color: Colors.blue),
+                                    icon: const Icon(Icons.edit, color: Colors.blue),
                                     onPressed: () {
                                       showUpdateDescriptionDialog(context, route['id'], {
                                         "route_name": route['route_name'],
@@ -165,6 +180,7 @@ class _MapState extends State<Map> {
                               ),
                           ],
                         ),
+
                         const SizedBox(height: 10),
                         Text(
                           route['description'],
@@ -172,11 +188,14 @@ class _MapState extends State<Map> {
                           style: const TextStyle(fontSize: 16, color: Colors.black),
                         ),
                         const SizedBox(height: 10),
-                        Text(
-                          route['station_list'],
-                          textAlign: TextAlign.left,
-                          style: const TextStyle(fontSize: 16, color: Colors.black),
-                        ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 18), // กำหนด padding รอบๆ
+                            child: Text(
+                              route['station_list'], // ข้อความที่จะแสดง
+                              textAlign: TextAlign.left, // จัดชิดซ้าย
+                              style: const TextStyle(fontSize: 16, color: Colors.black),
+                            ),
+                          ),
                         if (route['note'] != null)
                           Padding(
                             padding: const EdgeInsets.only(top: 10),
