@@ -37,7 +37,7 @@ class LinkPage extends StatelessWidget {
         '/News'   : (context) =>  News(),
         '/Bus'    : (context) =>  Bus(),
         '/'       : (context) =>  Home(),
-        '/Map'    : (context) =>  Map(),
+        '/Map'    : (context) =>  map(),
         '/Contact': (context) =>  Contact(),
         
       },

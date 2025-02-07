@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:up_transit/frontend/page/configip/config.dart';
+import 'package:up_transit/frontend/page/Map.dart';
+import 'package:up_transit/frontend/page/configip/config.dart'; // Add this import
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:up_transit/frontend/page/token.dart';
 
@@ -44,7 +45,7 @@ class RouteDescriptionData {
       };
 }
 
-void showUpdateDescriptionDialog(BuildContext context, int id, Map<String, String> currentData) {
+void showUpdateDescriptionDialog(BuildContext context, int id, Map<String, dynamic> currentData) {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _routeName = TextEditingController(text: currentData["route_name"]);
   final TextEditingController _descriptionController = TextEditingController(text: currentData["description"]);
@@ -114,11 +115,18 @@ void showUpdateDescriptionDialog(BuildContext context, int id, Map<String, Strin
                       },
                     ),
                     const SizedBox(height: 20),
-                    TextFormField(
-                      controller: _stationListController,
-                      decoration: const InputDecoration(
-                        labelText: 'Station List',
-                        border: OutlineInputBorder(),
+                    SizedBox(
+                      height: 150, // กำหนดความสูงของกล่อง
+                      child: TextFormField(
+                        controller: _stationListController,
+                        decoration: const InputDecoration(
+                          labelText: 'Station List',
+                          border: OutlineInputBorder(),
+                          alignLabelWithHint: true,
+                        ),
+                        maxLines: null,
+                        expands: true,
+                        keyboardType: TextInputType.multiline,
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -177,12 +185,15 @@ void showUpdateDescriptionDialog(BuildContext context, int id, Map<String, Strin
 
                 if (response.statusCode == 200) {
                   Navigator.of(context).pop();
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => map()),);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Failed to update description'), backgroundColor: Colors.red),
+                    SnackBar(content: Text('Failed to update contact'), backgroundColor: Colors.red),
                   );
                 }
               }
+              
             },
             child: Text('Update'),
           ),
