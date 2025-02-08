@@ -21,10 +21,12 @@
 
 -- Please log an issue at https://github.com/pgadmin-org/pgadmin4/issues/new/choose if you find any bugs, including reproduction steps.
 
-BEGIN;
+    BEGIN;
 
-CREATE TABLE IF NOT EXISTS public.contacts
-(
+    CREATE TABLE IF NOT EXISTS public.contacts
+
+    (
+
     id serial NOT NULL,
 
     image_path text COLLATE pg_catalog."default" NOT NULL,
@@ -44,12 +46,14 @@ CREATE TABLE IF NOT EXISTS public.contacts
     created_at timestamp without time zone DEFAULT now(),
 
     CONSTRAINT contacts_pkey PRIMARY KEY (id)
-);
+
+    );
 
 
-CREATE TABLE IF NOT EXISTS public.description_map
+    CREATE TABLE IF NOT EXISTS public.description_map
 
-(
+    (
+
     id serial NOT NULL,
 
     route_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
@@ -67,12 +71,14 @@ CREATE TABLE IF NOT EXISTS public.description_map
     created_at timestamp without time zone DEFAULT now(),
 
     CONSTRAINT description_map_pkey PRIMARY KEY (id)
-);
+
+    );
 
 
-CREATE TABLE IF NOT EXISTS public.device_data
+    CREATE TABLE IF NOT EXISTS public.device_data
 
-(
+    (
+
     id serial NOT NULL,
 
     device_id character varying(255) COLLATE pg_catalog."default" NOT NULL,
@@ -90,12 +96,14 @@ CREATE TABLE IF NOT EXISTS public.device_data
     CONSTRAINT device_data_pkey PRIMARY KEY (id),
 
     CONSTRAINT device_data_device_id_key UNIQUE (device_id)
-);
+
+    );
 
 
-CREATE TABLE IF NOT EXISTS public.news
+    CREATE TABLE IF NOT EXISTS public.news
 
-(
+    (
+
     id serial NOT NULL,
 
     image_path text COLLATE pg_catalog."default" NOT NULL,
@@ -111,12 +119,14 @@ CREATE TABLE IF NOT EXISTS public.news
     created_at timestamp without time zone DEFAULT now(),
 
     CONSTRAINT news_pkey PRIMARY KEY (id)
-);
+
+    );
 
 
-CREATE TABLE IF NOT EXISTS public.user_profiles
+    CREATE TABLE IF NOT EXISTS public.user_profiles
 
-(
+    (
+
     id serial NOT NULL,
 
     user_id integer NOT NULL,
@@ -128,12 +138,14 @@ CREATE TABLE IF NOT EXISTS public.user_profiles
     updated_at timestamp without time zone DEFAULT now(),
 
     CONSTRAINT user_profiles_pkey PRIMARY KEY (id)
-);
+
+    );
 
 
-CREATE TABLE IF NOT EXISTS public.users
+    CREATE TABLE IF NOT EXISTS public.users
 
-(
+    (
+
     id serial NOT NULL,
 
     username character varying(255) COLLATE pg_catalog."default" NOT NULL,
@@ -145,10 +157,10 @@ CREATE TABLE IF NOT EXISTS public.users
     CONSTRAINT users_pkey PRIMARY KEY (id),
 
     CONSTRAINT users_username_key UNIQUE (username)
-);
+    );
 
 
-ALTER TABLE IF EXISTS public.contacts
+    ALTER TABLE IF EXISTS public.contacts
 
     ADD CONSTRAINT fk_contacts_user FOREIGN KEY (user_id)
 
@@ -159,7 +171,7 @@ ALTER TABLE IF EXISTS public.contacts
     ON DELETE SET NULL;
 
 
-ALTER TABLE IF EXISTS public.description_map
+    ALTER TABLE IF EXISTS public.description_map
 
     ADD CONSTRAINT fk_description_user FOREIGN KEY (created_by)
 
@@ -170,7 +182,7 @@ ALTER TABLE IF EXISTS public.description_map
     ON DELETE SET NULL;
 
 
-ALTER TABLE IF EXISTS public.device_data
+    ALTER TABLE IF EXISTS public.device_data
 
     ADD CONSTRAINT fk_device_user FOREIGN KEY (user_id)
 
@@ -181,7 +193,7 @@ ALTER TABLE IF EXISTS public.device_data
     ON DELETE SET NULL;
 
 
-ALTER TABLE IF EXISTS public.news
+    ALTER TABLE IF EXISTS public.news
 
     ADD CONSTRAINT fk_news_user FOREIGN KEY (created_by)
 
@@ -192,7 +204,7 @@ ALTER TABLE IF EXISTS public.news
     ON DELETE SET NULL;
 
 
-ALTER TABLE IF EXISTS public.user_profiles
+    ALTER TABLE IF EXISTS public.user_profiles
 
     ADD CONSTRAINT fk_user FOREIGN KEY (user_id)
 
@@ -202,7 +214,7 @@ ALTER TABLE IF EXISTS public.user_profiles
 
     ON DELETE CASCADE;
 
-END;
+    END;
 
 2.) การ import project
 
