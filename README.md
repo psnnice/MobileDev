@@ -260,23 +260,25 @@ Port: 5432
 
 *** ก่อน build อย่าลืมแก้ IP ให้เป็น IP ของตัวเอง ที่ frontend/page/configip/config.dart ***
 
-	*** เช็ค IP เปิด cmd พิมพ์คำสั่ง : ipconfig ***
+*** เช็ค IP เปิด cmd พิมพ์คำสั่ง : ipconfig ***
 
- Backend
+Backend
 
-	พิมพ์คำสั่ง: 
+พิมพ์คำสั่ง: 
 
-cd \lib\backend
+    cd \lib\backend
 
-go run main.go ใน TERMINAL
+    go run main.go 
 
- Frontend
+ใน TERMINAL
 
-	พิมพ์คำสั่ง:
+Frontend
 
-cd \lib\frontend
+พิมพ์คำสั่ง:
 
-flutter run 
+    cd \lib\frontend
+
+    flutter run 
 
 ใน TERMINAL
 
