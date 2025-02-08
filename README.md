@@ -166,8 +166,8 @@ flutter run
 เปิด Android Studio ไปที่ Project มุมซ้ายบน จากนั้นเลือก More Action ต่อมา เลือก Virtual Device Manager ที่มุมซ้ายบนจะมี Icons รูป (+) เพื่อสร้างเครื่องจำลอง ต่อมาเลือกขนาดอุปกรณ์ ต่อมา เลือก System Image เมื่อได้อุปกรณ์ตามต้องการแล้ว กด finish
 จากนั้นเปิด visual studio code ไปที่ไฟล์งานหลัก กดที่ Chrome (web-javascript) มุมขวาล่างเพื่อเปลี่ยนอุปกรณ์ที่จะทำการจำลอง เลือกอุปกรณ์จำลองที่เราสร้างขึ้นจาก Android Studio
 
-การรันบนมือถือจริง
-เปิด Developer Mode บนโทรศัพท์ Android
-เปิด USB Debugging
+การรันบนมือถือจริง \n
+เปิด Developer Mode บนโทรศัพท์ Android \n
+เปิด USB Debugging \n
 เชื่อมต่ออุปกรณ์กับคอมพิวเตอร์ 
 
