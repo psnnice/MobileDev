@@ -74,12 +74,14 @@ class _LoginPageState extends State<LoginPage> {
           final id = data['id']; // ดึง id จาก response
           // บันทึก token
           await secureStorage.saveToken(token);
+          await secureStorage.saveUsername(username);
+          await secureStorage.saveUserId(id);
 
           bool hasToken = await secureStorage.hasToken();
           print('Token exists: $hasToken'); // พิมพ์ผลลัพธ์ลงใน console
 
           Provider.of<UserProvider>(context, listen: false).setRole(role);
-          Provider.of<UserProvider>(context, listen: false).setUser(username, id);
+
           
           if (role == 'user' || role == 'admin') {
             Navigator.pushReplacement(

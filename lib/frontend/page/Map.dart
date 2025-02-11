@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
+import 'package:up_transit/frontend/page/token.dart';
 import 'package:up_transit/frontend/page/updateFunction/updateDesMap.dart';
 
 import 'BasePage.dart';
@@ -31,29 +32,52 @@ class _MapState extends State<map> {
   }
 
   Future<void> _fetchRoutes() async {
-    try {
-      final response = await http.get(Uri.parse('http://$ip:8080/description_map'));
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
-        setState(() {
-          routeData = data.map((route) {
-            return {
-              "id": route["id"] ?? "",
-              "route_name": route["route_name"] ?? "",
-              "image_path": route["image_path"] ?? "",
-              "description": route["description"] ?? "",
-              "station_list": route["station_list"] ?? "",
-              "note": route["note"] ?? "",
-            };
-          }).toList();
-        });
-      } else {
-        throw Exception('Failed to load routes');
-      }
-    } catch (e) {
-      debugPrint('Error fetching routes: $e');
+  try {
+    final token = await SecureStorage().getToken(); // ดึง token จาก SecureStorage
+
+    if (token == null) {
+      throw Exception('No token found. Please log in again.');
+    }
+
+    final response = await http.get(
+      Uri.parse('http://$ip:8080/description_map'),
+      headers: {
+        "Authorization": "Bearer $token", // เพิ่ม token เข้าไปใน header
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+      setState(() {
+        routeData = data.map((route) {
+          return {
+            "id": route["id"] ?? "",
+            "route_name": route["route_name"] ?? "",
+            "image_path": route["image_path"] ?? "",
+            "description": route["description"] ?? "",
+            "station_list": route["station_list"] ?? "",
+            "note": route["note"] ?? "",
+          };
+        }).toList();
+      });
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized: Invalid or expired token');
+    } else {
+      throw Exception('Failed to load routes: ${response.statusCode}');
+    }
+  } catch (e) {
+    debugPrint('Error fetching routes: $e');
+    if (mounted) { // เช็คว่า widget ยังคงอยู่หรือไม่
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error fetching routes: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
+}
+
 
   void _onPageChanged(int index) {
     setState(() {

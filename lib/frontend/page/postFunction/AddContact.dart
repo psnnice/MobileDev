@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/Calls.dart';
-import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:up_transit/frontend/page/token.dart';
 
 List<Map<String, dynamic>> contactData = [];
@@ -105,14 +103,14 @@ void showAddContactDialog(BuildContext context) {
                               Container(
                                 child: Image.file(
                                   _profileImageFile!,
-                                  width: 60,
-                                  height: 60,
+                                  width: 50,
+                                  height: 50,
                                   fit: BoxFit.cover,
                                 ),
                               ),
                               Positioned(
-                                bottom: 35,
-                                left: 35,
+                                bottom: 27,
+                                left: 27,
                                 child: IconButton(
                                   icon: Icon(Icons.cancel_outlined,   
                                   color: Colors.red,              
@@ -264,7 +262,7 @@ void showAddContactDialog(BuildContext context) {
                   "email": _emailController.text,
                   "phoneNumber": _phoneNumberController.text,
                   "url": _urlController.text,
-                  "user_id": Provider.of<UserProvider>(context, listen: false).id,
+                  "user_id": await SecureStorage().getUserId(),
                 };
 
                 contactData.add(newContact);

@@ -4,14 +4,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
-import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:up_transit/frontend/page/token.dart';
-
 var ip = Config.ip;
 
 void showAddProfileDialog(BuildContext context) {
+  // final _formKey = GlobalKey<FormState>();
   File? _imageFile;
 
   Future<void> _pickImage(StateSetter setState) async {
@@ -27,46 +25,50 @@ void showAddProfileDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Edit Profile Picture'),
+        title: Text('Add Profile Picture'),
         content: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: Icon(Icons.add_photo_alternate_rounded),
-                  onPressed: () => _pickImage(setState),
-                ),
-                SizedBox(height: 8),
-                Text(_imageFile != null ? 'Image Selected' : 'No Image Selected'),
-                if (_imageFile != null)
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Image.file(
-                        _imageFile!,
-                        width: 150,
-                        height: 150,
-                        fit: BoxFit.cover,
-                      ),
-                      Positioned(
-                        top: -10,
-                        right: -10,
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.cancel_outlined,
-                            color: const Color.fromARGB(255, 0, 0, 0),
-                            size: 40,
+                Column(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.add_photo_alternate_rounded),
+                      onPressed: () => _pickImage(setState),
+                    ),
+                    SizedBox(width: 8),
+                    Text(_imageFile != null ? 'Image Selected' : 'No Image Selected'),
+                    if (_imageFile != null)
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Image.file(
+                            _imageFile!,
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _imageFile = null;
-                            });
-                          },
-                        ),
+                          Positioned(
+                            bottom: 35,
+                            left: 35,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.cancel_outlined,
+                                color: Colors.red,
+                                size: 25,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _imageFile = null;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                  ],
+                ),
               ],
             );
           },
@@ -81,53 +83,60 @@ void showAddProfileDialog(BuildContext context) {
           ElevatedButton(
             onPressed: () async {
               if (_imageFile != null) {
-                final userProvider = Provider.of<UserProvider>(context, listen: false);
-                final int? userId = userProvider.id;
+                int? userId = await SecureStorage().getUserId() as int?;
                 final profileData = {
+                  "profile_image_path": base64Encode(_imageFile!.readAsBytesSync()),
                   "user_id": userId,
-                  "profile_image_path": _imageFile!.path,
                 };
-
-                final secureStorage = SecureStorage();
-                final token = await secureStorage.getToken();
+                final token = await SecureStorage().getToken();
+                print('Uploading to: http://$ip:8080/user_profile/$userId');
                 final response = await http.post(
-                  Uri.parse('http://$ip:8080/user_profile/'),
+                  Uri.parse('http://$ip:8080/user_profile/$userId'),
                   headers: {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer $token",
                   },
                   body: jsonEncode(profileData),
                 );
-
-                if (response.statusCode == 201 || response.statusCode == 200) {
-                  // อัปเดตโปรไฟล์ใน Provider
-                  userProvider.setProfileImagePath(_imageFile!.path);
-
-                  Navigator.of(context).pop(); // Close dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Profile picture uploaded successfully!'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
+                if (response.statusCode == 200) {
+                  Navigator.of(context).pop();
                 } else {
+                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
+                     // ปิด Dialog
                     SnackBar(
-                      content: Text('${response.statusCode}'),
+                      content: Text('${response.body}'),
                       backgroundColor: Colors.green,
                     ),
                   );
                 }
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Please select an image first!'),
-                    backgroundColor: Colors.orange,
-                  ),
+              }
+              else {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: Text(
+                        
+                        'Please select an image',
+                        textAlign: TextAlign.center, // ทำให้ข้อความอยู่ตรงกลาง
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
                 );
               }
+              Navigator.of(context).pop();
             },
             child: Text('Upload'),
+            
           ),
         ],
       );

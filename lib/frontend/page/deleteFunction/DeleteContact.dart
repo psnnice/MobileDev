@@ -4,7 +4,7 @@ import 'package:up_transit/frontend/page/token.dart';
 
 Future<void> deleteContact(BuildContext context, int id) async {
   final url = Uri.parse('http://$ip:8080/contacts/$id');
-    final SecureStorage secureStorage = SecureStorage();
+  final SecureStorage secureStorage = SecureStorage();
 
   try {
     final response = await secureStorage.deleteRequest(url.toString());

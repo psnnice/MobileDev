@@ -4,9 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/News.dart';
-import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:up_transit/frontend/page/token.dart';
 
 List<Map<String, dynamic>> newsData = [];
@@ -177,7 +175,7 @@ void showAddNewsDialog(BuildContext context) {
           ElevatedButton(
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
-                int? createBy = Provider.of<UserProvider>(context, listen: false).id;
+                int? createBy = await SecureStorage().getUserId() as int?; // ดึง userId จาก SecureStorage
                 final news = {
                   "imagePath": _imageFile != null ? base64Encode(_imageFile!.readAsBytesSync()) : '',
                   "title": _titleController.text,

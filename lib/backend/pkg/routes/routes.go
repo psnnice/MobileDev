@@ -24,15 +24,16 @@ func SetupRoutes(app *fiber.App) {
 	app.Put("/description_map/:id", middleware.CheckToken, description_map.UpdateDescriptionMapHandler)
 
 	app.Post("/news", middleware.CheckToken, news.InsertNewsHandler)
-	app.Get("/news", news.GetNewsHandler)
+	app.Get("/news", middleware.CheckToken, news.GetNewsHandler)
 	app.Put("/news/:id", middleware.CheckToken, news.UpdateNewsHandler)
 	app.Delete("/news/:id", middleware.CheckToken, news.DeleteNewsHandler)
 
 	app.Post("/contacts", middleware.CheckToken, contacts.InsertContactHandler)
-	app.Get("/contacts", contacts.GetContactHandler)
+	app.Get("/contacts", middleware.CheckToken, contacts.GetContactHandler)
 	app.Put("/contacts/:id", middleware.CheckToken, contacts.UpdateContactHandler)
 	app.Delete("/contacts/:id", middleware.CheckToken, contacts.DeleteContactHandler)
 
-	app.Post("/user_profile", middleware.CheckToken, profile.UploadProfileHandler)
-
+	app.Post("/user_profile/:id", middleware.CheckToken, profile.UploadProfileHandler)
+	app.Get("/user_profile/:id", middleware.CheckToken, profile.GetProfileHandler)
+	app.Delete("/user_profile/:id", middleware.CheckToken, profile.DeleteProfileHandler)
 }

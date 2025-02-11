@@ -2,6 +2,8 @@ package bus
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -23,18 +25,31 @@ type DeviceData struct {
 func InsertDeviceDataHandler(c *fiber.Ctx) error {
 	var deviceDataList []DeviceData
 	if err := c.BodyParser(&deviceDataList); err != nil {
+		log.Println("Invalid request payload:", err)
 		return c.Status(http.StatusBadRequest).SendString("Invalid request payload: " + err.Error())
 	}
 
 	for _, deviceData := range deviceDataList {
-		// แปลงเวลาจากรูปแบบ ISO 8601 เป็น time.Time
 		var err error
 		deviceData.Timestamp, err = time.Parse(time.RFC3339, deviceData.Timestamp.Format(time.RFC3339))
 		if err != nil {
+			log.Println("Invalid timestamp format:", err)
 			return c.Status(http.StatusBadRequest).SendString("Invalid timestamp format: " + err.Error())
 		}
-		// เรียกใช้ฟังก์ชัน InsertDeviceData สำหรับแต่ละ deviceData
+
+		// ตรวจสอบว่าผู้ใช้มีอยู่จริงหรือไม่
+		exists, err := checkUserExists(deviceData.UserID)
+		if err != nil {
+			log.Println("Error checking user existence:", err)
+			return c.Status(http.StatusInternalServerError).SendString("Error checking user existence: " + err.Error())
+		}
+		if !exists {
+			log.Println("Invalid user_id:", deviceData.UserID)
+			return c.Status(http.StatusBadRequest).SendString("Invalid user_id: User does not exist")
+		}
+
 		if err := InsertDeviceData(deviceData); err != nil {
+			log.Println("Failed to insert data:", err)
 			return c.Status(http.StatusInternalServerError).SendString("Failed to insert data: " + err.Error())
 		}
 	}
@@ -43,6 +58,10 @@ func InsertDeviceDataHandler(c *fiber.Ctx) error {
 }
 
 func InsertDeviceData(deviceData DeviceData) error {
+	if utils.DB == nil {
+		return fmt.Errorf("database connection is not initialized")
+	}
+
 	_, err := utils.DB.Exec(`
         INSERT INTO device_data (device_id, latitude, longitude, device_count, timestamp, user_id)
         VALUES ($1, $2, $3, $4, $5, $6)
@@ -53,7 +72,12 @@ func InsertDeviceData(deviceData DeviceData) error {
             timestamp = EXCLUDED.timestamp,
             user_id = EXCLUDED.user_id`,
 		deviceData.DeviceID, deviceData.Latitude, deviceData.Longitude, deviceData.DeviceCount, deviceData.Timestamp, deviceData.UserID)
-	return err
+
+	if err != nil {
+		log.Println("Database Insert Error:", err) // 👉 เพิ่ม log ตรวจสอบข้อผิดพลาด
+		return err
+	}
+	return nil
 }
 
 func GetDeviceDataHandler(c *fiber.Ctx) error {
@@ -71,15 +95,22 @@ func GetDeviceDataHandler(c *fiber.Ctx) error {
 	for rows.Next() {
 		var device DeviceData
 		if err := rows.Scan(&device.ID, &device.DeviceID, &device.Latitude, &device.Longitude, &device.DeviceCount, &device.Timestamp, &device.UserID); err != nil {
-			return c.Status(http.StatusInternalServerError).SendString("เกิดข้อผิดพลาดในการสแกนข้อมูล")
+			return c.Status(http.StatusInternalServerError).SendString("เกิดข้อผิดพลาดในการสแกนข้อมูล: " + err.Error())
 		}
 		devices = append(devices, device)
 	}
 
 	deviceDataJSON, err := json.Marshal(devices)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).SendString("เกิดข้อผิดพลาดในการแปลงข้อมูลเป็น JSON")
+		return c.Status(http.StatusInternalServerError).SendString("เกิดข้อผิดพลาดในการแปลงข้อมูลเป็น JSON: " + err.Error())
 	}
 
 	return c.Status(http.StatusOK).Send(deviceDataJSON)
+}
+
+// ฟังก์ชันตรวจสอบว่าผู้ใช้มีอยู่จริงหรือไม่
+func checkUserExists(userID int) (bool, error) {
+	var exists bool
+	err := utils.DB.QueryRow("SELECT EXISTS (SELECT 1 FROM users WHERE id = $1)", userID).Scan(&exists)
+	return exists, err
 }

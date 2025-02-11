@@ -4,10 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/News.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
-import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:up_transit/frontend/page/token.dart';
 
 var ip = Config.ip;
@@ -31,8 +29,7 @@ void showUpdateNewsDialog(BuildContext context, int id, Map<String, dynamic> cur
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final int? userId = userProvider.id;
+
 
       return AlertDialog(
         title: const Text('Update News'),
@@ -145,7 +142,7 @@ void showUpdateNewsDialog(BuildContext context, int id, Map<String, dynamic> cur
                   );
                   return;
                 }
-                print(userId);
+                final userId = await SecureStorage().getUserId();
                 final updatedNews = {
                   "id": id,
                   "title": _titleController.text,

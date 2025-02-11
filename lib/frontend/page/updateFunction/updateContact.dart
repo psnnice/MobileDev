@@ -5,10 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/Calls.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
-import 'package:up_transit/frontend/page/providers/user_provider.dart';
 import 'package:up_transit/frontend/page/token.dart';
 
 var ip = Config.ip;
@@ -40,8 +38,6 @@ void showUpdateContactDialog(BuildContext context, int id, Map<String, String> c
   showDialog(
     context: context,
     builder: (BuildContext context) {
-        final userProvider = Provider.of<UserProvider>(context, listen: false);
-        final int? userId = userProvider.id;
       return AlertDialog(
         title: Text('Update Contact'),
         content: StatefulBuilder(
@@ -262,6 +258,7 @@ void showUpdateContactDialog(BuildContext context, int id, Map<String, String> c
               if (_formKey.currentState!.validate()) {
                 final secureStorage = SecureStorage();
                 final token = await secureStorage.getToken();
+              
 
                 if (token == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -271,8 +268,10 @@ void showUpdateContactDialog(BuildContext context, int id, Map<String, String> c
                 }
 
                 // ✅ ดึง user_id จาก Provider
+                final userId = await SecureStorage().getUserId();
 
                 final updatedContact = {
+                  
                   "imagePath": _imageFile != null ? base64Encode(_imageFile!.readAsBytesSync()) : currentContact["imagePath"] ?? '',
                   "profileImage": _profileImageFile != null ? base64Encode(_profileImageFile!.readAsBytesSync()) : currentContact["profileImage"] ?? '',
                   "title": _titleController.text,

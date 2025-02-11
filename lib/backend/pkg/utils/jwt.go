@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"os"
 	"time"
 
@@ -31,8 +32,8 @@ func init() {
 func GenerateToken(username, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"username": username,
-		"role":     role,                                  // เพิ่ม role ใน claims
-		"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token หมดอายุใน 24 ชั่วโมง
+		"role":     role,                                   // เพิ่ม role ใน claims
+		"exp":      time.Now().Add(time.Hour * 720).Unix(), // Token หมดอายุใน 24 ชั่วโมง
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -45,15 +46,24 @@ func ValidateToken(tokenStr string) (map[string]interface{}, error) {
 		return jwtSecret, nil
 	})
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		// ดึง username และ role จาก claims
-		result := map[string]interface{}{
-			"username": claims["username"],
-			"role":     claims["role"],
-		}
-		return result, nil
-
-	} else {
-		return nil, err
+	if err != nil {
+		return nil, err // คืนค่าข้อผิดพลาดหากการแปลง Token ล้มเหลว
 	}
+
+	if token == nil || !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("invalid token claims")
+	}
+
+	// ดึง username และ role จาก claims
+	result := map[string]interface{}{
+		"username": claims["username"],
+		"role":     claims["role"],
+	}
+
+	return result, nil
 }

@@ -13,6 +13,7 @@ type UserProfile struct {
 	UserID           int    `json:"user_id"`
 	ProfileImagePath string `json:"profile_image_path"`
 	CreatedAt        string `json:"created_at"`
+	UpdatedAt        string `json:"updated_at"`
 }
 
 // Handler สำหรับอัปโหลดรูปโปรไฟล์
@@ -84,4 +85,62 @@ func UpdateProfile(db *sql.DB, profile UserProfile) error {
 	`
 	_, err := db.Exec(query, profile.ProfileImagePath, profile.CreatedAt, profile.UserID)
 	return err
+}
+
+func GetProfile(db *sql.DB, userID int) (*UserProfile, error) {
+	query := `
+        SELECT id, user_id, profile_image_path, created_at, updated_at
+        FROM public.user_profiles
+        WHERE user_id = $1
+    `
+	var profile UserProfile
+	err := db.QueryRow(query, userID).Scan(&profile.ID, &profile.UserID, &profile.ProfileImagePath, &profile.CreatedAt, &profile.UpdatedAt)
+	if err != nil {
+		return nil, err
+	}
+	return &profile, nil
+}
+
+// Handler สำหรับดึงข้อมูลโปรไฟล์
+func GetProfileHandler(c *fiber.Ctx) error {
+	userID, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid user ID")
+	}
+
+	profile, err := GetProfile(utils.DB, userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.Status(fiber.StatusNotFound).SendString("Profile not found")
+		}
+		return c.Status(fiber.StatusInternalServerError).SendString("Error retrieving profile: " + err.Error())
+	}
+
+	return c.JSON(profile)
+}
+
+func DeleteProfile(db *sql.DB, userID int) error {
+	query := `
+        DELETE FROM public.user_profiles
+        WHERE user_id = $1
+    `
+	_, err := db.Exec(query, userID)
+	return err
+}
+
+func DeleteProfileHandler(c *fiber.Ctx) error {
+	userID, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).SendString("Invalid user ID")
+	}
+
+	err = DeleteProfile(utils.DB, userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return c.Status(fiber.StatusNotFound).SendString("Profile not found")
+		}
+		return c.Status(fiber.StatusInternalServerError).SendString("Error deleting profile: " + err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).SendString("Profile deleted successfully")
 }

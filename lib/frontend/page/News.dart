@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
 import 'package:up_transit/frontend/page/providers/user_provider.dart';
+import 'package:up_transit/frontend/page/token.dart';
 import 'package:url_launcher/url_launcher.dart'; // ใช้สำหรับเปิดลิงก์
 
 import 'Basepage.dart';
@@ -34,14 +35,23 @@ class _NewsPageState extends State<News> {
   // ฟังก์ชันสำหรับดึงข้อมูลจาก API
   Future<void> _fetchNews() async {
   try {
-    final response = await http.get(Uri.parse('http://$ip:8080/news'));
+    final token = await SecureStorage().getToken(); // ดึง token จาก SecureStorage
 
-    print("Response Body: ${response.body}"); // ✅ เช็กค่าที่ API ส่งมา
+    if (token == null) {
+      throw Exception('No token found. Please log in again.');
+    }
+
+    final response = await http.get(
+      Uri.parse('http://$ip:8080/news'),
+      headers: {
+        "Authorization": "Bearer $token", // ✅ เพิ่ม token เข้าไปใน header
+      },
+    );
 
     if (response.statusCode == 200) {
       final decodedData = json.decode(utf8.decode(response.bodyBytes));
 
-      if (decodedData is List) { // ✅ ตรวจสอบว่าข้อมูลเป็น List หรือไม่
+      if (decodedData is List) { // ✅ ตรวจสอบว่า API ส่ง List กลับมาหรือไม่
         setState(() {
           newsData = decodedData.map((news) {
             return {
@@ -56,17 +66,22 @@ class _NewsPageState extends State<News> {
       } else {
         throw Exception("Invalid data format: Expected List but got ${decodedData.runtimeType}");
       }
+    } else if (response.statusCode == 401) {
+      throw Exception('Unauthorized: Invalid or expired token');
     } else {
       throw Exception('Failed to load news: ${response.statusCode}');
     }
   } catch (error) {
     print("Error fetching news: $error"); // ✅ Debug error
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error fetching news: $error'),
-        backgroundColor: Colors.red,
-      ),
-    );
+
+    if (mounted) { // ✅ เช็คว่า Widget ยังอยู่หรือไม่
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error fetching news: $error'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }
 

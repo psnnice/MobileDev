@@ -5,19 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:up_transit/frontend/page/Basepage.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
-
 import 'package:up_transit/frontend/page/mockDataDevices/mockData.dart';
- // นำเข้าไฟล์ mockData.dart
+import 'package:up_transit/frontend/page/token.dart'; // นำเข้าไฟล์ mockData.dart
 
 var ip = Config.ip;
+bool _hasStartedFetchingData = false;
+bool _hasProcessedData = false;
 
+SecureStorage secureStorage = SecureStorage();
 class Bus extends StatefulWidget {
   @override
   _BusPageState createState() => _BusPageState();
-  
 }
 
 class _BusPageState extends State<Bus> {
@@ -30,28 +30,39 @@ class _BusPageState extends State<Bus> {
   bool _showRoute2 = true;
   bool _showRoute3 = true;
 
+
+  
   @override
   void initState() {
     super.initState();
     _loadRoutes();
-    _fetchData();
-    _startFetchingData();
-    processAndInsertData(context);
+    
+    if (!_hasStartedFetchingData) {
+      _startFetchingData();
+      _hasStartedFetchingData = true;
+    }
+    if (!_hasProcessedData) {
+      processAndInsertData(context);
+      _hasProcessedData = true;
+    }
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _hasStartedFetchingData = false;
+    _hasProcessedData = false;
     super.dispose();
   }
 
   void _startFetchingData() {
+    _fetchData();
     _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-      _fetchData();
+    _fetchData();
     });
   }
 
-Future<void> _fetchData() async {
+  Future<void> _fetchData() async {
     final deviceMarkers = await _fetchDeviceData();
     final busStopMarkers = await _loadBusStops();
     setState(() {
@@ -61,38 +72,52 @@ Future<void> _fetchData() async {
     });
   }
 
-
-  
   Future<Set<Marker>> _fetchDeviceData() async {
-    print('Fetching device data...');
-    final url = Uri.parse('http://$ip:8080/DataBus');
-    final response = await http.get(url);
+  print('Fetching device data...');
+  final token = await SecureStorage().getToken(); // ✅ ดึง token จาก SecureStorage
 
-    final Set<Marker> deviceMarkers = {};
-    
-    if (response.statusCode == 200) {
-      print('Data fetched successfully');
-      final List<dynamic> data = json.decode(response.body);
-      
-      for (var item in data) {
-        final latitude = item['latitude'] is int ? (item['latitude'] as int).toDouble() : item['latitude'];
-        final longitude = item['longitude'] is int ? (item['longitude'] as int).toDouble() : item['longitude'];
-        deviceMarkers.add(Marker(
-          markerId: MarkerId(item['device_id']),
-          position: LatLng(latitude,longitude),
-          infoWindow: InfoWindow(
-            title: 'Device ID: ${item['device_id']}',
-            snippet: 'Device Count: ${item['device_count']}',
-          ),
-          icon: AssetMapBitmap( 'assets/images/Logos/bus.png', width: 24, height: 24),
-        ));
-      }
-    } else {
-      print('Failed to load device data: ${response.statusCode}');
-    }
-
-    return deviceMarkers;
+  if (token == null) {
+    print('No token found. Please log in again.');
+    return {}; // ✅ ส่งคืนชุดข้อมูลว่างหากไม่มี token
   }
+
+  final url = Uri.parse('http://$ip:8080/DataBus');
+  final response = await http.get(
+    url,
+    headers: {
+      "Authorization": "Bearer $token", // ✅ เพิ่ม token เข้าไปใน header
+    },
+  );
+
+  final Set<Marker> deviceMarkers = {};
+
+  if (response.statusCode == 200) {
+    print('Data fetched successfully');
+    final List<dynamic> data = json.decode(response.body);
+
+    for (var item in data) {
+      final latitude = item['latitude'] is int ? (item['latitude'] as int).toDouble() : item['latitude'];
+      final longitude = item['longitude'] is int ? (item['longitude'] as int).toDouble() : item['longitude'];
+      
+      deviceMarkers.add(Marker(
+        markerId: MarkerId(item['device_id']),
+        position: LatLng(latitude, longitude),
+        infoWindow: InfoWindow(
+          title: 'Device ID: ${item['device_id']}',
+          snippet: 'Device Count: ${item['device_count']}',
+        ),
+        icon: AssetMapBitmap('assets/images/Logos/bus.png', width: 24, height: 24),
+      ));
+    }
+  } else if (response.statusCode == 401) {
+    print('Unauthorized: Invalid or expired token');
+  } else {
+    print('Failed to load device data: ${response.statusCode}');
+  }
+
+  return deviceMarkers;
+}
+
 
   Future<void> _loadRoutes() async {
     final route1 = await _loadRoute('assets/jsonFile/route1.json');
@@ -124,18 +149,18 @@ Future<void> _fetchData() async {
     });
   }
 
-Future<List<LatLng>> _loadRoute(String path) async {
-  final data = await rootBundle.loadString(path);
-  final jsonResult = json.decode(data);
-  
-  if (jsonResult == null || jsonResult is! List) {
-    throw Exception('Invalid JSON format or empty data');
+  Future<List<LatLng>> _loadRoute(String path) async {
+    final data = await rootBundle.loadString(path);
+    final jsonResult = json.decode(data);
+
+    if (jsonResult == null || jsonResult is! List) {
+      throw Exception('Invalid JSON format or empty data');
+    }
+
+    return jsonResult.map<LatLng>((point) => LatLng(point['lat'], point['lng'])).toList();
   }
 
-  return jsonResult.map((point) => LatLng(point['lat'], point['lng'])).toList();
-}
-
-    Future<Set<Marker>> _loadBusStops() async {
+  Future<Set<Marker>> _loadBusStops() async {
     final busStopIcon = await BitmapDescriptor.fromAssetImage(
       ImageConfiguration(size: Size(48, 48)), // ปรับขนาดของไอคอนที่นี่
       'assets/images/Logos/stop.png',

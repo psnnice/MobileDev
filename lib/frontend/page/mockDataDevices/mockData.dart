@@ -5,9 +5,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:up_transit/frontend/page/configip/config.dart';
-import 'package:up_transit/frontend/page/providers/user_provider.dart';
+import 'package:up_transit/frontend/page/token.dart';
 
 var ip = Config.ip;
 
@@ -20,7 +19,8 @@ Future<List<Map<String, dynamic>>> loadRouteData() async {
 Future<void> InsertDeviceData(List<DeviceData> deviceDataList) async {
   final url = Uri.parse('http://$ip:8080/DataBus');
   final body = json.encode(deviceDataList.map((data) => data.toJson()).toList());
-  print('Sending data: $body');
+  final firstBody = json.encode(deviceDataList[0].toJson());
+  print('Sending data: $firstBody');
 
   final response = await http.post(
     url,
@@ -30,15 +30,19 @@ Future<void> InsertDeviceData(List<DeviceData> deviceDataList) async {
 
   if (response.statusCode == 200) {
     print('Data inserted successfully');
-  } else {
-    print('Failed to insert data: ${response.body}');
+  }  else {
+    final responseBody = json.decode(response.body);
+    final firstResponseBody = responseBody is List && responseBody.isNotEmpty
+        ? responseBody[0]
+        : responseBody;
+    print('Failed to insert data: $firstResponseBody');
   }
 }
 
 Future<void> processAndInsertData(BuildContext context) async {
   
-  final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final int? userId = userProvider.id; // ดึง userId จาก Provider
+
+   // ดึง userId จาก Provider
 
   final routes = await loadRouteData();
   final random = Random();
@@ -59,10 +63,12 @@ Future<void> processAndInsertData(BuildContext context) async {
         longitude: longitude,
         deviceCount: random.nextInt(30) + 1,
         timestamp: DateTime.now().toUtc(),
-        userId: userId, // ใช้ userId ที่ดึงมา
+        userId: await SecureStorage().getUserId(), // ใช้ userId ที่ดึงมา
       );
 
+    if(j == 1){
       developer.log('Inserting device data: ${deviceData.toJson()}');
+    }
       deviceDataList.add(deviceData);
     }
 
